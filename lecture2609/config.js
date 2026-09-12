@@ -9,6 +9,8 @@
    ▣ cardOpen(「회차」) 이 false 면 카드는 어디에도 안 보이고 모두 계좌 입금 — 그로블 판매 시작 전(9/12).
      켜면 비회원은 3쪽 맨 위에서 [카드로 결제] / [계좌로 입금] 을 고르고, 고른 방법의 금액만 크게 본다.
      금액: cardAmountNonmember 55,000 · transferAmountNonmember 50,000 · receiptSurcharge 0.1 (9/12 오너 확정).
+   ▣ 9/12 밤 오너 수정: 노랑 상자는 멤버십 혜택만 · 비회원 계좌 금액 옆 「(부가세 별도)」 · 금액 상자와 현금영수증 사이 구분선 ·
+     회원은 10,000원 고정(현금영수증 두 문항 없음) · 카드는 「결제하기」 한 번에 결제 창(끝 화면 없이, 돌아오면 「결제만 남았어요」).
    ▣ 미리보기(시트에 아무것도 안 적힌다)
        ?preview=done&member=아니오&payWith=카드  비회원 카드 끝 화면(결제 버튼)
        ?preview=done&member=아니오&payWith=계좌  비회원 계좌 끝 화면      ?preview=done&member=예  회원 끝 화면
@@ -66,9 +68,15 @@ function cardPay(a) {                                                           
 }
 function bankPay(a) { return !useCoupon(a) && !cardPay(a) && !payPending(a); }
 function payAmountOf(a) {                                                                           // 카드 금액
-  return a.member === '예' ? (회차.payAmountMember || Math.round(회차.feeMember * (1 + surcharge()))) : 회차.cardAmountNonmember;
+  return a.member === '예' ? (회차.payAmountMember || 회차.feeMember) : 회차.cardAmountNonmember;
 }
-function bankTotal(a) { return Math.round(feeOf(a) * (a.receipt ? 1 + surcharge() : 1)); }        // 입금하실 금액
+/* 입금하실 금액 — 회원은 늘 feeMember(10,000원). 현금영수증 10%·부가세는 비회원만(9/12 오너) */
+function bankTotal(a) { return a.member === '예' ? 회차.feeMember : Math.round(feeOf(a) * (a.receipt ? 1 + surcharge() : 1)); }
+function receiptAsk(a) { return bankPay(a) && a.member !== '예'; }                                 // 현금영수증 두 문항 — 계좌로 내는 비회원만
+function payLink(a, id) {                                                                           // 신청번호 → 그로블 sellerReference
+  var url = payUrlOf(a);
+  return id ? url + (url.indexOf('?') >= 0 ? '&' : '?') + 'ref=' + encodeURIComponent(id) : url;
+}
 function mailNote(a, res) {                                                                         // 끝 화면 한 줄 — 서버가 메일을 보냈을 때만(미리보기는 늘)
   if (res && res.mail === 'queued') return '오늘 신청이 많이 몰려서, 확인 메일은 내일 아침에 보내 드려요.';   // 한도 초과 — 다음 날 다시 보내기가 살아 있을 때만 서버가 queued 로 답한다
   if (!(res && (res.mail === 'sent' || res.preview))) return '';
@@ -101,11 +109,14 @@ window.FORM = {
     회차.online && 회차.replay ? '📼 ' + 회차.replay : null,
     '⚠️ ' + 회차.deadlineText
   ].filter(function (x) { return x; }),
-  /* 히어로 아래 노랑 상자 (문구: 한결 · 오너, 문구검사 통과 — 고치지 않는다) */
-  /* + 멤버십 혜택(9/12 오너, 문구검사 통과 — 고치지 않는다). 비회원 금액은 여기 적지 않는다(결제 방법을 고른 뒤에만 보인다) */
-  banner: 멈춤 && 회차.online ? '<b>멤버십 회원이신가요?</b><br>온라인으로 들으실 거면 <b>신청서를 쓰지 않으셔도 돼요.</b> 라이브 링크는 멤버십 공지방에서 드려요.<br>오프라인으로 오실 분만 신청해 주세요.' +
-    '<div class="lead-perk"><span class="perk-t">💛 멤버십 혜택 — 정기특강 온라인 수강 무료</span>멤버십 회원은 매달 열리는 정기특강을 온라인으로 무료로 듣습니다. 오프라인으로 오셔도 <b>강의실 비용 1만 원</b>이면 됩니다.</div>' : '',
-  submitLabel: '신청서 제출',
+  /* 히어로 아래 노랑 상자 — 멤버십 혜택만(9/12 밤 오너: 「멤버십 회원이신가요?」 블록은 뺐다. 멤버십+온라인 멈춤 화면은 그대로).
+     문구검사 통과 — 고치지 않는다. 비회원 금액은 여기 적지 않는다(결제 방법을 고른 뒤에만 보인다) */
+  banner: 멈춤 && 회차.online ? '<div class="lead-perk"><span class="perk-t">💛 멤버십 혜택 — 정기특강 온라인 수강 무료</span>멤버십 회원은 매달 열리는 정기특강을 온라인으로 무료로 듣습니다. 오프라인으로 오셔도 <b>강의실 비용 1만 원</b>이면 됩니다.</div>' : '',
+  /* 카드로 결제를 고르면 마지막 버튼이 「결제하기」 — 누르면 신청을 보내고(시트·확인 메일), 접수되면 끝 화면 없이 같은 탭에서
+     바로 결제 창으로(9/12 밤 오너: 버튼을 두 번 누르게 하지 않는다). 계좌·쿠폰·회원은 「신청서 제출」 */
+  submitLabel: function (a) { return cardPay(a) ? '결제하기' : '신청서 제출'; },
+  sendingLabel: function (a) { return cardPay(a) ? '결제 창으로 넘어가는 중…' : '보내는 중…'; },
+  payRedirect: function (a, res) { return cardPay(a) && res && res.id ? payLink(a, res.id) : ''; },
 
   pages: [
     { title: '', fields: [
@@ -162,22 +173,24 @@ window.FORM = {
       { type: 'info', html: function (a) {
           if (useCoupon(a)) return '<b>쿠폰으로 참석</b> — 쿠폰이 확인되면 입금 없이 참석하실 수 있어요. 확인 결과는 카카오톡으로 알려 드려요.';
           if (payPending(a)) return '';
-          if (cardPay(a)) return '수강료 <span class="big">' + won(payAmountOf(a)) + '</span> (부가세 포함) — 신청서를 내면 다음 화면에서 카드로 결제합니다. <b>결제까지 마쳐야 신청이 완료됩니다.</b>';
+          if (cardPay(a)) return '수강료 <span class="big">' + won(payAmountOf(a)) + '</span> (부가세 포함) — 「결제하기」를 누르면 바로 카드 결제 창으로 넘어갑니다. <b>결제까지 마쳐야 신청이 완료됩니다.</b>';   // 9/12 밤 오너 확정(문구검사 통과)
           /* 금액은 한 번만(9/12 오너) — 「입금하실 금액」 하나만 크게, 현금영수증을 고르면 이 숫자가 바뀐다 */
           var tags = [];
-          if (a.member === '예') tags.push('멤버십 회원 · 강의실 비용');
-          if (a.receipt && surcharge()) tags.push('현금영수증 ' + pct() + '% 포함');
+          if (a.member === '예') tags.push('멤버십 회원 · 강의실 비용');                     // 회원은 부가세·현금영수증 표시 없음(9/12 밤 오너)
+          else if (a.receipt && surcharge()) tags.push('현금영수증 ' + pct() + '% 포함');
+          else tags.push('부가세 별도');                                                     // 비회원 계좌 기본(9/12 밤 오너)
           return '입금계좌 : <b>' + 회차.account + '</b><br>' +
             '<span class="big">입금하실 금액 ' + won(bankTotal(a)) + '</span>' +
             (tags.length ? ' <span class="sub">(' + tags.join(' · ') + ')</span>' : '');
         } },
-      /* 계좌로 내는 사람만 — 카드 전표가 지출 증빙이라 카드는 현금영수증·입금자명이 필요 없다 */
-      { key: 'receipt', type: 'ack', checkLabel: '예', showIf: bankPay,
+      /* 현금영수증 — 계좌로 내는 비회원만. 카드 전표가 지출 증빙이라 카드는 필요 없고, 회원은 10,000원이라 두 문항을 아예 안 보인다(9/12 밤 오너).
+         divider — 금액 상자와 이 질문 사이 구분선(9/12 밤 오너) */
+      { key: 'receipt', type: 'ack', checkLabel: '예', showIf: receiptAsk, divider: true,
         label: function () {
           return surcharge() ? '소득공제 혹은 지출증빙을 위해 현금영수증 발급을 원하실 경우 강의비의 ' + pct() + '%(부가세)를 추가 입금해주세요.'
                              : '소득공제 혹은 지출증빙을 위해 현금영수증 발급을 원하시면 「예」를 눌러 주세요.';
         } },
-      { key: 'receiptNo', type: 'text', label: '현금영수증 발급을 원하는 휴대폰 번호 또는 사업자 번호를 적어주세요.', maxlength: 20, showIf: bankPay },
+      { key: 'receiptNo', type: 'text', label: '현금영수증 발급을 원하는 휴대폰 번호 또는 사업자 번호를 적어주세요.', maxlength: 20, showIf: receiptAsk },
       { key: 'depositAck', type: 'ack', checkLabel: '예', required: true, err: '확인하고 「예」를 눌러 주세요',
         showIf: function (a) { return !payPending(a); },
         label: function (a) {
@@ -201,8 +214,7 @@ window.FORM = {
      결제가 끝나면 그로블이 카카오채널로 보낸다(상품에 설정). 계좌·쿠폰은 Tally 끝 화면 그대로 */
   done: function (a, res) {
     if (cardPay(a)) {
-      var url = payUrlOf(a);
-      if (res.id) url += (url.indexOf('?') >= 0 ? '&' : '?') + 'ref=' + encodeURIComponent(res.id);   // 신청번호 → 그로블 sellerReference
+      var url = payLink(a, res.id);                                   // 이제는 결제 창에서 뒤로 오거나 창을 닫고 다시 들어온 사람이 보는 화면
       return {
         title: '결제만 남았어요',
         button: { label: '수강료 결제하기', href: url, sameTab: true },
