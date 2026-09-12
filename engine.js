@@ -15,6 +15,10 @@
  *  - 신청번호: 서버가 만들어 돌려준다(j.id). 끝 화면 설정이 함수면 두 번째 인자 res.id 로 받는다
  *  - 쓰던 답 남기기(keepDraft): 새로고침해도 답이 남는다. 이 기기·이 탭의 sessionStorage 에만, 제출·마감 때 지운다
  *  - 끝 화면 버튼: 링크 · restart(답을 비우고 1쪽) · back(답은 두고 1쪽, clear 에 적은 칸만 비움)
+ *  - 마지막 버튼 글자(submitLabel)·보내는 중 글자(sendingLabel)는 함수면 답에 따라 바뀐다.
+ *    payRedirect(a, res) 가 주소를 돌려주면 접수 뒤 끝 화면 없이 같은 탭에서 그 주소로 간다(카드 결제 — 9/12 밤).
+ *    넘어가기 직전에 따로 적어 두어, 뒤로 오거나 다시 들어오면 끝 화면을 본다. 미리보기는 넘어가지 않고 주소만 보여 준다
+ *  - 문항 divider: true 면 그 문항 위에 구분선
  *
  * 오래된 안드로이드 카톡 웹뷰를 위해 ?. 와 ?? 는 쓰지 않는다.
  */
@@ -49,7 +53,7 @@
       fd._page = i; FIELDS.push(fd); byKey[fd.key] = fd;
     });
   });
-  var cur = 0, sending = false;
+  var cur = 0, sending = false, leaving = false;                 // leaving: 결제 창으로 넘어가는 중
   var qs = new URLSearchParams(location.search);
   var PREVIEW = (qs.get('preview') || '').toLowerCase();            // 미리보기 — 서버로 아무것도 보내지 않는다
   var JUMP = ['done', 'stop', 'closed'].indexOf(PREVIEW) >= 0 ? PREVIEW : '';
@@ -77,7 +81,7 @@
   function fieldHTML(fd) {
     var k = fd.key, id = 'f_' + k;
     var hint = fd.hint ? '<span class="hint">' + fd.hint + '</span>' : '';
-    var open = '<div class="q' + (fd.type === 'info' ? ' info' : '') + '" data-k="' + k + '">';
+    var open = '<div class="q' + (fd.type === 'info' ? ' info' : '') + (fd.divider ? ' divider' : '') + '" data-k="' + k + '">';   // divider: 위에 구분선
     switch (fd.type) {
       case 'info':
         return open + '<div class="infobox' + (fd.warn ? ' warn' : '') + (fd.cls ? ' ' + fd.cls : '') + '" data-html="' + k + '"></div></div>';   // cls: 상자 모양을 하나 더
@@ -184,10 +188,13 @@
       (call(PAGES[cur].title) ? '<h2 class="pagetitle">' + esc(call(PAGES[cur].title)) + '</h2>' : '');   // 쪽 제목도 답에 따라 바뀔 수 있다
   }
   function setErr(m) { var e = document.getElementById('formErr'); e.textContent = m || ''; e.style.display = m ? 'block' : 'none'; }
+  /* 마지막 쪽 버튼 글자 — submitLabel 이 함수면 답에 따라 바뀐다(예: 카드면 「결제하기」). 보내는 중에는 건드리지 않는다 */
+  function submitText() { return call(F.submitLabel) || '신청하기'; }
+  function goLabel() { if (!sending) go.textContent = cur === PAGES.length - 1 ? submitText() : '다음'; }
   function showPage() {
     refresh(); stepsRender(); setErr('');
     back.hidden = cur === 0;
-    go.textContent = cur === PAGES.length - 1 ? (F.submitLabel || '신청하기') : '다음';
+    goLabel();
     window.scrollTo(0, 0);
   }
 
@@ -286,10 +293,31 @@
   }
   function closedNow() { return !!F.deadline && Date.now() > new Date(F.deadline).getTime(); }
 
+  /* ── 결제 창으로 넘어간 신청 (payRedirect) ───────────────────────────
+     넘어가기 직전에 keepDraft 와 다른 칸에 따로 적어 둔다. 결제 창에서 뒤로 오거나 창을 닫고 다시 들어오면
+     신청서가 아니라 끝 화면(결제 버튼·메일 한 줄)을 보여 준다. 이 탭에서만, 12시간까지 */
+  var PAID_KEY = 'bw_apply_paid_' + (F.formId || 'form');
+  function savePaid(res) {
+    try { sessionStorage.setItem(PAID_KEY, JSON.stringify({ A: A, res: { ok: true, id: res.id, mail: res.mail }, t: Date.now() })); } catch (x) {}
+  }
+  function loadPaid() {
+    if (PREVIEW || !F.payRedirect) return null;
+    var p = null;
+    try { p = JSON.parse(sessionStorage.getItem(PAID_KEY) || 'null'); } catch (x) { return null; }
+    return p && p.res && p.A && Date.now() - (p.t || 0) < 12 * 3600 * 1000 ? p : null;
+  }
+  function showPaid(p) { for (var k in p.A) A[k] = p.A[k]; leaving = false; sending = false; end('done', p.res); }
+
   /* ── 보내기 ─────────────────────────────────────────────────────────── */
   function agreed(k) { var fd = byKey[k]; return !!fd && visible(fd) && A[k] === true; }   // 숨은 동의 칸(예: 회원)은 체크가 남아 있어도 안 보낸다
   function send() {
-    if (PREVIEW) { end('done', { ok: true, id: F.previewId || 'PREVIEW', preview: true }); return; }   // 미리보기 — 보내지 않는다
+    if (PREVIEW) {                                                // 미리보기 — 보내지 않는다
+      var pr = { ok: true, id: F.previewId || 'PREVIEW', preview: true }, pto = F.payRedirect ? F.payRedirect(A, pr) : '';
+      end('done', pr);
+      if (pto) document.getElementById('done').insertAdjacentHTML('afterbegin',   // 결제 창으로 넘어가는 대신 넘어갈 주소만 보여 준다
+        '<p class="preview-go">미리보기라 결제 창으로 넘어가지 않아요. 실제로는 바로 이 주소로 넘어가요.<br><code>' + esc(pto) + '</code></p>');
+      return;
+    }
     if (!F.endpoint) { setErr('신청 받기를 준비하고 있어요. 조금 뒤에 다시 와 주세요.'); return; }
     var answers = {};
     FIELDS.forEach(function (fd) {
@@ -304,17 +332,25 @@
       consentPrivacy: agreed('privacy'), consentMarketing: agreed('marketing'),
       website: document.getElementById('website').value
     };
-    sending = true; go.disabled = true; go.textContent = '보내는 중…';
+    sending = true; go.disabled = true; go.textContent = call(F.sendingLabel) || '보내는 중…';
     // text/plain 으로 보내야 브라우저가 사전 확인(preflight) 없이 바로 보낸다 — 다이어리 백엔드와 같은 방식
     fetch(F.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (j) {
-        if (j && j.ok) { end('done', j); return; }
+        if (j && j.ok) {
+          var to = F.payRedirect ? F.payRedirect(A, j) : '';
+          if (to) {                                               // 카드 — 끝 화면 없이 같은 탭에서 바로 결제 창
+            savePaid(j); clearDraft(); leaving = true;
+            location.assign(to);
+            return;
+          }
+          end('done', j); return;
+        }
         if (j && j.error === 'closed') { end('closed'); return; }
         throw new Error((j && j.error) || 'fail');
       })
       .catch(function () { setErr('잠깐 연결이 불안정해요. 다시 눌러 주세요.'); })
-      .then(function () { sending = false; go.disabled = false; go.textContent = F.submitLabel || '신청하기'; });
+      .then(function () { if (leaving) return; sending = false; go.disabled = false; goLabel(); });   // 넘어가는 중이면 버튼은 그대로(두 번 누름 방지)
   }
 
   function next() {
@@ -336,12 +372,15 @@
     readField(fd);
     var q = e.target.closest('.q'); if (q) q.classList.remove('bad');
     if (fd.type === 'source') { var pk = app.querySelector('[data-picked="' + k + '"]'); if (pk) pk.style.display = 'none'; }
-    refresh(); stepsRender(); saveDraft();
+    refresh(); stepsRender(); goLabel(); saveDraft();
     if (F.stopIf && F.stopIf(A)) end('stop');                    // 고르는 순간 — 나머지 칸을 쓰기 전에 멈춤 화면으로
   }
   app.addEventListener('input', onChange);
   app.addEventListener('change', onChange);
   back.addEventListener('click', function () { if (cur > 0) { cur--; saveDraft(); showPage(); } });
+  window.addEventListener('pageshow', function (e) {            // 결제 창에서 「뒤로」 — 브라우저가 떠나기 전 화면을 그대로 되살린 경우
+    if (e.persisted && leaving) { var p = loadPaid(); if (p) showPaid(p); }
+  });
   form.addEventListener('submit', function (e) { e.preventDefault(); next(); });
   app.addEventListener('click', function (e) {
     if (!e.target.closest) return;
@@ -366,6 +405,7 @@
   }
   applyLink();
   loadDraft();                                                  // 새로고침 전에 쓰던 답 (keepDraft 일 때만)
+  var PAID = loadPaid();                                        // 결제 창으로 넘어갔다가 다시 들어온 신청 (payRedirect 일 때만)
 
   FIELDS.forEach(readField);
   if (JUMP) {
@@ -373,6 +413,7 @@
     FIELDS.forEach(function (fd) { if (qs.has(fd.key)) A[fd.key] = qs.get(fd.key); });
     end(JUMP, { ok: true, id: F.previewId || 'PREVIEW', preview: true });
   } else if (!PREVIEW && closedNow()) end('closed');
+  else if (PAID) showPaid(PAID);                                // 결제 창에서 돌아온 사람 — 끝 화면(결제 버튼)
   else if (F.stopIf && F.stopIf(A)) end('stop');                // 멈춤 화면에서 새로고침한 경우
   else showPage();
 
