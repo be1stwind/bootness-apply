@@ -11,6 +11,8 @@
      금액: cardAmountNonmember 55,000 · transferAmountNonmember 50,000 · receiptSurcharge 0.1 (9/12 오너 확정).
    ▣ 9/12 밤 오너 수정: 노랑 상자는 멤버십 혜택만 · 비회원 계좌 금액 옆 「(부가세 별도)」 · 금액 상자와 현금영수증 사이 구분선 ·
      회원은 10,000원 고정(현금영수증 두 문항 없음) · 카드는 「결제하기」 한 번에 결제 창(끝 화면 없이, 돌아오면 「결제만 남았어요」).
+   ▣ 9/13 오너: 계좌 끝 화면(비회원·회원) 맨 위에 「입금하실 금액 ○원 (…) / 입금 계좌는 아래 부트니스 카카오채널로 문의해 주세요.」
+     — 확인 메일(v5)과 같은 말. 숫자와 괄호는 3쪽과 같은 함수(bankTotal·amountTag)라 어긋나지 않는다.
    ▣ 미리보기(시트에 아무것도 안 적힌다)
        ?preview=done&member=아니오&payWith=카드  비회원 카드 끝 화면(결제 버튼)
        ?preview=done&member=아니오&payWith=계좌  비회원 계좌 끝 화면      ?preview=done&member=예  회원 끝 화면
@@ -73,6 +75,12 @@ function payAmountOf(a) {                                                       
 /* 입금하실 금액 — 회원은 늘 feeMember(10,000원). 현금영수증 10%·부가세는 비회원만(9/12 오너) */
 function bankTotal(a) { return a.member === '예' ? 회차.feeMember : Math.round(feeOf(a) * (a.receipt ? 1 + surcharge() : 1)); }
 function receiptAsk(a) { return bankPay(a) && a.member !== '예'; }                                 // 현금영수증 두 문항 — 계좌로 내는 비회원만
+/* 「입금하실 금액」 옆 괄호 — 3쪽과 계좌 끝 화면이 같이 쓴다(숫자·표시가 어긋나지 않게, 9/13) */
+function amountTag(a) {
+  if (a.member === '예') return '멤버십 회원 · 강의실 비용';                  // 회원은 부가세·현금영수증 표시 없음(9/12 밤 오너)
+  if (a.receipt && surcharge()) return '현금영수증 ' + pct() + '% 포함';
+  return '부가세 별도';                                                       // 비회원 계좌 기본(9/12 밤 오너)
+}
 function payLink(a, id) {                                                                           // 신청번호 → 그로블 sellerReference
   var url = payUrlOf(a);
   return id ? url + (url.indexOf('?') >= 0 ? '&' : '?') + 'ref=' + encodeURIComponent(id) : url;
@@ -175,13 +183,8 @@ window.FORM = {
           if (payPending(a)) return '';
           if (cardPay(a)) return '수강료 <span class="big">' + won(payAmountOf(a)) + '</span> (부가세 포함) — 「결제하기」를 누르면 바로 카드 결제 창으로 넘어갑니다. <b>결제까지 마쳐야 신청이 완료됩니다.</b>';   // 9/12 밤 오너 확정(문구검사 통과)
           /* 금액은 한 번만(9/12 오너) — 「입금하실 금액」 하나만 크게, 현금영수증을 고르면 이 숫자가 바뀐다 */
-          var tags = [];
-          if (a.member === '예') tags.push('멤버십 회원 · 강의실 비용');                     // 회원은 부가세·현금영수증 표시 없음(9/12 밤 오너)
-          else if (a.receipt && surcharge()) tags.push('현금영수증 ' + pct() + '% 포함');
-          else tags.push('부가세 별도');                                                     // 비회원 계좌 기본(9/12 밤 오너)
           return '입금계좌 : <b>' + 회차.account + '</b><br>' +
-            '<span class="big">입금하실 금액 ' + won(bankTotal(a)) + '</span>' +
-            (tags.length ? ' <span class="sub">(' + tags.join(' · ') + ')</span>' : '');
+            '<span class="big">입금하실 금액 ' + won(bankTotal(a)) + '</span> <span class="sub">(' + amountTag(a) + ')</span>';
         } },
       /* 현금영수증 — 계좌로 내는 비회원만. 카드 전표가 지출 증빙이라 카드는 필요 없고, 회원은 10,000원이라 두 문항을 아예 안 보인다(9/12 밤 오너).
          divider — 금액 상자와 이 질문 사이 구분선(9/12 밤 오너) */
@@ -222,9 +225,12 @@ window.FORM = {
         note: mailNote(a, res)
       };
     }
+    /* 계좌 끝 화면 맨 위 — 입금 금액과 계좌 문의(9/13 오너, 확인 메일 v5 와 같은 말). 숫자·괄호는 3쪽과 같은 함수 */
+    var payBox = bankPay(a) ? '<span class="paybox">입금하실 금액 <b>' + won(bankTotal(a)) + '</b> <span class="sub">(' + amountTag(a) + ')</span><br>' +
+      '입금 계좌는 아래 부트니스 카카오채널로 문의해 주세요.</span>' : '';
     return {
       title: '신청서를 받았어요',
-      html: '부트니스에서는 수강생의 귀한 비용과 시간이 아깝지 않은 강의 준비를 위해 최선을 다하고 있습니다.<br><br>부트니스의 다양한 강의 소식들을 가장 빨리 접하고 싶으시다면',
+      html: payBox + '부트니스에서는 수강생의 귀한 비용과 시간이 아깝지 않은 강의 준비를 위해 최선을 다하고 있습니다.<br><br>부트니스의 다양한 강의 소식들을 가장 빨리 접하고 싶으시다면',
       button: { label: '카카오채널 추가하기', href: 회차.kakaoChannel },
       tail: '카카오채널을 추가해주세요! 😄',
       note: mailNote(a, res)
