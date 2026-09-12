@@ -107,6 +107,10 @@ input:focus,textarea:focus{border-color:var(--ink)}
 /* 미리보기에서만 — 카드 「결제하기」가 실제로는 넘어갈 주소 */
 .end p.preview-go{margin:0 0 16px;padding:10px 12px;border-radius:10px;background:#fff7d9;border:1px dashed #e0bf2e;font-size:13.5px;line-height:1.6;text-align:left;color:var(--ink)}
 .end p.preview-go code{font-size:12.5px;word-break:break-all}
+/* 끝 화면 금액 상자 — 계좌 입금 끝 화면 맨 위(9/13). html 이 <p> 안에 들어가서 span 을 블록으로 */
+.end .paybox{display:block;margin:0 0 18px;padding:14px 16px;background:#fbf8f0;border:1px solid #efe8d6;border-radius:12px;color:var(--ink);font-size:15px;line-height:1.7}
+.end .paybox b{font-size:19px;font-weight:800;color:var(--ink)}
+.end .paybox .sub{color:var(--sub);font-size:13.5px}
 .endbtn{display:block;text-decoration:none;font-weight:800;font-size:17px;color:var(--onyellow);
   background:var(--yellow);border-radius:14px;padding:15px 0;margin:4px 0 16px}
 button.endbtn{width:100%;border:0;font-family:inherit;cursor:pointer}
