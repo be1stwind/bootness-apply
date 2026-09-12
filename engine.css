@@ -61,6 +61,7 @@ input:focus,textarea:focus{border-color:var(--ink)}
 .infobox b{font-weight:800}
 .infobox .big{font-size:18px;font-weight:800;color:var(--ink)}
 .q.info{padding-bottom:0;border-bottom:0;margin-bottom:12px}
+.q.divider{border-top:1px solid var(--line);padding-top:18px;margin-top:6px}   /* 문항 divider — 앞 상자와 이 문항 사이 구분선(9/12 밤) */
 
 /* 동의 — .q>label 의 display:block 이 이기지 않게 .q>label.consent 로 누른다(9/12 오너 실측: 체크박스가 글자에 붙어 떴다).
    글자가 두 줄로 넘어가도 체크박스는 첫 줄 가운데에 맞춘다: 체크박스 22px ≒ 글자 15px × 줄높이 1.5 */
@@ -79,6 +80,7 @@ input:focus,textarea:focus{border-color:var(--ink)}
 .lead-box>b:first-child{font-size:16.5px}
 /* 멤버십 혜택 — 구분선 아래 한 단계 크게(9/12 오너: 멤버십이 아닌 사람도 혜택을 확 알게) */
 .lead-perk{margin-top:12px;padding-top:12px;border-top:1.5px dashed #e0bf2e;font-size:15.5px}
+.lead-box>.lead-perk:first-child{margin-top:0;padding-top:0;border-top:0}   /* 상자에 혜택만 있을 때 — 위 점선 없이(9/12 밤) */
 .perk-t{display:block;font-size:17px;font-weight:800;margin-bottom:2px}
 /* 3쪽 맨 위 카톡 안내 — 굵은 첫 줄, 한 단계 큰 글자, 노란 상자 */
 .infobox.kakao-note{font-size:15.5px;padding:14px 16px;border-width:2px;border-color:#f4d017;background:#fff5c9}
@@ -102,6 +104,9 @@ input:focus,textarea:focus{border-color:var(--ink)}
 .end a:not(.endbtn){color:var(--ink)}
 .end p.mail-note{margin:4px 0 0;padding:10px 12px;border-radius:10px;background:#f4f1e8;font-size:14px;line-height:1.6;color:var(--sub)}
 .end p.mail-note b{color:var(--ink);word-break:break-all}
+/* 미리보기에서만 — 카드 「결제하기」가 실제로는 넘어갈 주소 */
+.end p.preview-go{margin:0 0 16px;padding:10px 12px;border-radius:10px;background:#fff7d9;border:1px dashed #e0bf2e;font-size:13.5px;line-height:1.6;text-align:left;color:var(--ink)}
+.end p.preview-go code{font-size:12.5px;word-break:break-all}
 .endbtn{display:block;text-decoration:none;font-weight:800;font-size:17px;color:var(--onyellow);
   background:var(--yellow);border-radius:14px;padding:15px 0;margin:4px 0 16px}
 button.endbtn{width:100%;border:0;font-family:inherit;cursor:pointer}
