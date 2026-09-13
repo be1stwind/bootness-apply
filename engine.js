@@ -19,6 +19,7 @@
  *    payRedirect(a, res) 가 주소를 돌려주면 접수 뒤 끝 화면 없이 같은 탭에서 그 주소로 간다(카드 결제 — 9/12 밤).
  *    넘어가기 직전에 따로 적어 두어, 뒤로 오거나 다시 들어오면 끝 화면을 본다. 미리보기는 넘어가지 않고 주소만 보여 준다
  *  - 문항 divider: true 면 그 문항 위에 구분선
+ *  - 답이 doGet 핑이거나 결제 창으로 갈 신청인데 신청번호가 없으면 같은 신청을 한 번 더 보낸다. 그래도 없으면 오류(9/13)
  *
  * 오래된 안드로이드 카톡 웹뷰를 위해 ?. 와 ?? 는 쓰지 않는다.
  */
@@ -334,9 +335,21 @@
     };
     sending = true; go.disabled = true; go.textContent = call(F.sendingLabel) || '보내는 중…';
     // text/plain 으로 보내야 브라우저가 사전 확인(preflight) 없이 바로 보낸다 — 다이어리 백엔드와 같은 방식
-    fetch(F.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json(); })
+    var payload = JSON.stringify(body);
+    function post() {
+      return fetch(F.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: payload })
+        .then(function (r) { return r.json(); });
+    }
+    /* 이 답이 우리 POST 의 답이 아닐 수 있다 — doGet 핑({ok, ping})이 돌아왔거나, 결제 창으로 갈 신청인데 신청번호가 없다.
+       (9/13 한결 카드 시험: 시트에는 적혔는데 브라우저에는 doGet 핑이 돌아와 ?ref= 없는 결제 버튼이 떴다.)
+       그러면 같은 신청을 한 번 더 보낸다 — 60초 안 같은 휴대폰이면 서버가 새 줄 없이 첫 신청번호를 돌려준다.
+       그래도 모르면 결제 버튼을 띄우지 않고 다시 누르게 한다. 결제 링크에는 늘 ?ref= 가 붙는다 */
+    var needsId = !!(F.payRedirect && F.payRedirect(A, { id: 'x' }));
+    function doubtful(j) { return !!(j && j.ok && (j.ping || (needsId && !j.id))); }
+    post()
+      .then(function (j) { return doubtful(j) ? post() : j; })
       .then(function (j) {
+        if (doubtful(j)) throw new Error('noid');
         if (j && j.ok) {
           var to = F.payRedirect ? F.payRedirect(A, j) : '';
           if (to) {                                               // 카드 — 끝 화면 없이 같은 탭에서 바로 결제 창
