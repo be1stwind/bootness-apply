@@ -137,7 +137,9 @@
     '<section class="end" id="done" hidden></section>' +
     '<section class="end" id="closed" hidden></section>' +
     '<section class="end" id="stop" hidden></section>' +
-    '<p class="foot">부트니스 · BOOTNESS</p>';
+    '<p class="foot">부트니스 · BOOTNESS' +
+      (F.privacyUrl ? ' · <a href="' + esc(F.privacyUrl) + '" target="_blank" rel="noopener">개인정보처리방침</a>' : '') +
+    '</p>';   // privacyUrl 이 있으면 바닥에 한 줄 (메타 광고 요건 · 찾기 쉬운 곳에 둔다)
 
   var form = document.getElementById('f'), back = document.getElementById('back'), go = document.getElementById('go');
 
