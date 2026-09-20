@@ -106,6 +106,7 @@ window.FORM = {
   deadline: 회차.deadline,
   previewId: 회차.previewId,
   keepDraft: true,                                    // 새로고침해도 쓰던 답이 남는다(이 기기·이 탭에만). 제출·마감 때 지운다
+  privacyUrl: 'https://apply.btns.kr/privacy/',       // 바닥 링크 「개인정보처리방침」 (9/20)
   accent: '#383839',
   eyebrow: '부트니스 정기특강',
   title: 회차.title,
