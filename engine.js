@@ -137,6 +137,7 @@
     '<section class="end" id="done" hidden></section>' +
     '<section class="end" id="closed" hidden></section>' +
     '<section class="end" id="stop" hidden></section>' +
+    '<section class="end" id="full" hidden></section>' +   // 정원이 다 찼을 때 (시각 마감과 이유가 다르다)
     '<p class="foot">부트니스 · BOOTNESS' +
       (F.privacyUrl ? ' · <a href="' + esc(F.privacyUrl) + '" target="_blank" rel="noopener">개인정보처리방침</a>' : '') +
     '</p>';   // privacyUrl 이 있으면 바닥에 한 줄 (메타 광고 요건 · 찾기 쉬운 곳에 둔다)
@@ -233,7 +234,7 @@
   }
   function showEnd(kind) {
     form.hidden = !!kind;
-    ['done', 'closed', 'stop'].forEach(function (x) { document.getElementById(x).hidden = x !== kind; });
+    ['done', 'closed', 'stop', 'full'].forEach(function (x) { document.getElementById(x).hidden = x !== kind; });
     var lb = document.getElementById('leadBox'); if (lb) lb.hidden = !!kind;   // 맨 위 강조 상자는 신청서를 쓰는 동안만
   }
   function end(kind, res) {
@@ -245,7 +246,7 @@
       (c.tail ? '<p>' + call(c.tail) + '</p>' : '') +
       (note ? '<p class="mail-note">' + note + '</p>' : '');
     showEnd(kind);
-    if (kind === 'done' || kind === 'closed') clearDraft();     // 멈춤 화면은 남겨 둔다 — 「돌아가기」로 이어 쓴다
+    if (kind === 'done' || kind === 'closed' || kind === 'full') clearDraft();   // 멈춤 화면은 남겨 둔다 — 「돌아가기」로 이어 쓴다
     window.scrollTo(0, 0);
   }
   /* 「처음으로」 — 답을 모두 비우고 1쪽부터. 링크의 유입경로는 다시 채운다 */
@@ -361,6 +362,7 @@
           }
           end('done', j); return;
         }
+        if (j && j.error === 'full') { end(F.full ? 'full' : 'closed', j); return; }   // 정원이 다 찼다 — 화면이 준비돼 있으면 그쪽으로(정원 수도 넘긴다)
         if (j && j.error === 'closed') { end('closed'); return; }
         throw new Error((j && j.error) || 'fail');
       })
