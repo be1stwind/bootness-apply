@@ -2,17 +2,38 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f4d017">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
 <title>신청 · 부트니스</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
-<link rel="stylesheet" href="../engine.css?v=14">
+<link rel="canonical" href="https://apply.btns.kr/ai-auto/">
+<!--
+  옛 주소 → 새 주소. 2026-09-22 오너 확정으로 `lifejob2` 를 `ai-auto` 로 바꿨다.
+  ⚠️ **이 폴더를 지우지 않는다.** 어딘가에 옛 주소를 적어 둔 사람이 있을 수 있다.
+  ⚠️ **물음표 뒤(`?src=cafe` 같은 꼬리표)를 그대로 달고 넘긴다** — 안 그러면 유입경로가 끊긴다.
+  자바스크립트가 막힌 브라우저를 위해 meta refresh 와 눈에 보이는 링크도 같이 둔다.
+-->
+<meta http-equiv="refresh" content="1;url=https://apply.btns.kr/ai-auto/">
+<style>
+body{margin:0;background:#faf7ef;color:#383839;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center}
+.box{padding:28px 22px}
+p{margin:0 0 14px;font-size:16px;line-height:1.6}
+a{color:#383839;font-weight:700}
+</style>
 </head>
 <body>
-<!-- 모든 신청 페이지가 이 파일을 똑같이 쓴다. 바뀌는 건 같은 폴더의 config.js 뿐이다. -->
-<main class="wrap" id="app"><p class="loaderr">신청서를 불러오는 중이에요…</p></main>
-<script src="config.js?v=14"></script>
-<script src="../engine.js?v=14"></script>
+<div class="box">
+  <p>신청서 주소가 바뀌었어요.<br>잠시 뒤 새 주소로 옮겨 드릴게요.</p>
+  <p><a id="go" href="https://apply.btns.kr/ai-auto/">바로 가기</a></p>
+</div>
+<script>
+(function () {
+  // 물음표 뒤 꼬리표를 그대로 달고 넘긴다 (?src=cafe 같은 유입경로)
+  var to = 'https://apply.btns.kr/ai-auto/' + (location.search || '') + (location.hash || '');
+  document.getElementById('go').href = to;
+  location.replace(to);
+})();
+</script>
 </body>
 </html>
