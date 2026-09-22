@@ -69,6 +69,7 @@
     if (fd.type === 'choice' || fd.type === 'source') return '하나를 골라 주세요';
     if (fd.type === 'multi') return '하나 이상 골라 주세요';
     if (fd.type === 'consent' || fd.type === 'ack') return '확인하고 체크해 주세요';
+    if (fd.type === 'file') return '사진을 올려 주세요';
     return '적어 주세요';
   }
   function options(fd) {
@@ -107,6 +108,16 @@
       case 'ack':
         return open + '<span class="lbl">' + lab(fd) + tag(fd) + '</span>' + hint +
           '<div class="chips"><label class="chip"><input type="checkbox" data-key="' + k + '"><span>' + esc(fd.checkLabel || '예') + '</span></label></div>' + errP(fd) + '</div>';
+      case 'file':
+        /* 사진 한 장. 고른 즉시 브라우저에서 줄여 두고(아래 pickFile), 보낼 때 본문에 같이 실어 보낸다.
+           고른 사진은 keepDraft 에 넣지 않는다 — 새로고침하면 다시 고르셔야 한다(용량 때문) */
+        return open + '<label for="' + id + '">' + lab(fd) + tag(fd) + '</label>' + hint +
+          '<div class="pick" data-pick="' + k + '">' +
+            '<input type="file" id="' + id + '" data-key="' + k + '" accept="' + (fd.accept || 'image/*') + '">' +
+            '<label class="pickbtn" for="' + id + '">' + esc(fd.pickLabel || '사진 고르기') + '</label>' +
+            '<p class="pickstate" data-state="' + k + '"></p>' +
+            '<div class="shot" data-shot="' + k + '" hidden><img alt="올리신 사진 미리보기"><button type="button" class="reshot" data-reshot="' + k + '">다시 고르기</button></div>' +
+          '</div>' + errP(fd) + '</div>';
       case 'consent':
         var note = !fd.notice ? '' : (Object.prototype.toString.call(fd.notice) === '[object Array]'
           ? '<dl class="agree-note">' + fd.notice.map(function (r) { return '<div><dt>' + esc(r[0]) + '</dt> <dd>' + esc(r[1]) + '</dd></div>'; }).join('') + '</dl>'
@@ -147,7 +158,7 @@
   /* ── 답 읽기 ────────────────────────────────────────────────────────── */
   function readField(fd) {
     var k = fd.key;
-    if (fd.type === 'info') return;
+    if (fd.type === 'info' || fd.type === 'file') return;         // 사진은 고르는 순간 pickFile 이 직접 넣는다
     var els = app.querySelectorAll('[data-key="' + k + '"]');
     var list = Array.prototype.slice.call(els);
     if (fd.type === 'multi') A[k] = list.filter(function (e) { return e.checked; }).map(function (e) { return e.value; });
@@ -159,6 +170,81 @@
   }
   function visible(fd) { return !fd.showIf || !!fd.showIf(A); }
   function required(fd) { return !!(fd.required || (fd.requiredIf && fd.requiredIf(A))); }
+
+  /* ── 사진 한 장 ────────────────────────────────────────────────────────
+     요즘 휴대폰 사진은 3~5MB 라 그대로 보내면 앱스 스크립트가 받다가 지친다.
+     그래서 고르는 순간 브라우저에서 긴 변을 MAX_EDGE 로 줄이고 JPEG 로 다시 굽는다.
+     줄인 것만 FILES 에 들고 있다가 보낼 때 본문에 같이 싣는다 — 따로 올리는 길은 만들지 않는다.
+     ⚠️ 고른 사진은 keepDraft 에 넣지 않는다. sessionStorage 는 몇 MB 에서 터진다 */
+  var FILES = {}, encoding = 0;
+  var MAX_EDGE = 1600, JPEG_Q = 0.85, MAX_BYTES = 3 * 1024 * 1024;
+
+  function human(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB'; }
+  function b64bytes(d) { return Math.round(String(d).length * 3 / 4); }
+  function setState(k, msg, bad) {
+    var p = app.querySelector('[data-state="' + k + '"]'); if (!p) return;
+    p.textContent = msg || '';
+    if (bad) p.classList.add('bad'); else p.classList.remove('bad');
+  }
+  function clearFile(k) {
+    delete FILES[k]; A[k] = '';
+    var sh = app.querySelector('[data-shot="' + k + '"]');
+    if (sh) { sh.hidden = true; sh.querySelector('img').removeAttribute('src'); }
+    var inp = app.querySelector('input[type="file"][data-key="' + k + '"]'); if (inp) inp.value = '';
+    setState(k, '');
+  }
+  function drawJpeg(img, w, h, q) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    var g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, w, h);                 // 투명한 PNG 가 검게 나오지 않게 흰 바탕을 깔고 그린다
+    g.drawImage(img, 0, 0, w, h);
+    return c.toDataURL('image/jpeg', q);
+  }
+  function jpgName(n) {
+    return String(n || 'photo').replace(/\.[^.]+$/, '').replace(/[\\/:*?"<>|]/g, '_').slice(0, 60) + '.jpg';
+  }
+  function shrink(file, done) {
+    var fr = new FileReader();
+    fr.onerror = function () { done(null, '사진을 읽지 못했어요. 다른 사진으로 해 주세요.'); };
+    fr.onload = function () {
+      var img = new Image();
+      img.onerror = function () { done(null, '이 사진은 브라우저가 열지 못했어요. 화면을 캡처해서 올려 주세요.'); };   // 아이폰 HEIC 등
+      img.onload = function () {
+        var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        if (!w || !h) { done(null, '사진 크기를 읽지 못했어요. 다른 사진으로 해 주세요.'); return; }
+        var r = Math.min(1, MAX_EDGE / Math.max(w, h)), q = JPEG_Q;
+        var out = drawJpeg(img, Math.round(w * r), Math.round(h * r), q);
+        for (var step = 0; step < 2 && b64bytes((out.split(',')[1] || '')) > MAX_BYTES; step++) {   // 그래도 크면 두 번까지 더 줄인다
+          q -= 0.2; r *= 0.75;
+          out = drawJpeg(img, Math.round(w * r), Math.round(h * r), q);
+        }
+        var data = out.split(',')[1] || '';
+        if (!data || b64bytes(data) > MAX_BYTES) { done(null, '사진이 너무 커요. 화면을 캡처해서 올려 주세요.'); return; }
+        done({ name: jpgName(file.name), type: 'image/jpeg', data: data, bytes: b64bytes(data), src: out });
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  function pickFile(fd, input) {
+    var k = fd.key, f = input.files && input.files[0];
+    if (!f) { clearFile(k); refresh(); return; }
+    if (!/^image\//.test(f.type || '') && !/\.(jpe?g|png|gif|webp|heic|heif)$/i.test(f.name || '')) {
+      clearFile(k); setState(k, '사진만 올릴 수 있어요.', true); return;
+    }
+    encoding++; setState(k, '사진을 줄이는 중이에요…');
+    shrink(f, function (r, err) {
+      encoding--;
+      if (!r) { clearFile(k); setState(k, err, true); refresh(); return; }
+      FILES[k] = { name: r.name, type: r.type, data: r.data };
+      A[k] = r.name;                                              // 빈칸 확인은 이 이름으로 한다 — 사진 자체는 FILES 에 있다
+      var sh = app.querySelector('[data-shot="' + k + '"]');
+      if (sh) { sh.querySelector('img').src = r.src; sh.hidden = false; }
+      setState(k, '올렸어요 · ' + human(r.bytes));
+      var q = app.querySelector('.q[data-k="' + k + '"]'); if (q) q.classList.remove('bad');
+      setErr(''); refresh(); saveDraft();
+    });
+  }
 
   /* ── 다시 그리기: 보이는 문항·필수 표시·답에 따라 바뀌는 안내 ────────────── */
   function refresh() {
@@ -275,7 +361,9 @@
   var DRAFT_KEY = 'bw_apply_' + (F.formId || 'form');
   function saveDraft() {
     if (!F.keepDraft || PREVIEW) return;
-    try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ A: A, cur: cur })); } catch (x) {}
+    var keep = {};   // 고른 사진은 남기지 않는다 — 새로고침하면 다시 고르셔야 한다(용량 때문)
+    for (var k in A) if (!byKey[k] || byKey[k].type !== 'file') keep[k] = A[k];
+    try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ A: keep, cur: cur })); } catch (x) {}
   }
   function clearDraft() { try { sessionStorage.removeItem(DRAFT_KEY); } catch (x) {} }
   function loadDraft() {
@@ -285,7 +373,7 @@
     if (!d || !d.A) return false;
     FIELDS.forEach(function (fd) {
       var v = d.A[fd.key];
-      if (v == null || fd.type === 'info') return;
+      if (v == null || fd.type === 'info' || fd.type === 'file') return;
       Array.prototype.forEach.call(app.querySelectorAll('[data-key="' + fd.key + '"]'), function (el) {
         if (el.type === 'radio') el.checked = el.value === v;
         else if (el.type === 'checkbox') el.checked = fd.type === 'multi' ? (Object.prototype.toString.call(v) === '[object Array]' && v.indexOf(el.value) >= 0) : !!v;
@@ -314,6 +402,20 @@
 
   /* ── 보내기 ─────────────────────────────────────────────────────────── */
   function agreed(k) { var fd = byKey[k]; return !!fd && visible(fd) && A[k] === true; }   // 숨은 동의 칸(예: 회원)은 체크가 남아 있어도 안 보낸다
+  /* 동의 증거 — **화면에 떠 있던 문구를 그대로** 실어 보낸다. 설정에 따로 적게 하면 화면과 어긋난다.
+     문구를 고치면 config 의 consentVersion 을 올린다. 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있어야 한다 */
+  function consentItems() {
+    var out = [];
+    FIELDS.forEach(function (fd) {
+      if (fd.type !== 'consent' || !visible(fd)) return;
+      var n = fd.notice, notice = !n ? ''
+        : (Object.prototype.toString.call(n) === '[object Array]'
+            ? n.map(function (r) { return r[0] + ': ' + r[1]; }).join(' / ')
+            : String(n).replace(/<[^>]*>/g, ''));                 // 안내문에 든 태그는 걷어 내고 글자만
+      out.push({ key: fd.key, agreed: A[fd.key] === true, label: call(fd.label) || '', notice: notice });
+    });
+    return out;
+  }
   function send() {
     if (PREVIEW) {                                                // 미리보기 — 보내지 않는다
       var pr = { ok: true, id: F.previewId || 'PREVIEW', preview: true }, pto = F.payRedirect ? F.payRedirect(A, pr) : '';
@@ -325,8 +427,8 @@
     if (!F.endpoint) { setErr('신청 받기를 준비하고 있어요. 조금 뒤에 다시 와 주세요.'); return; }
     var answers = {};
     FIELDS.forEach(function (fd) {
-      if (fd.type === 'info' || fd.type === 'consent' || fd.noSubmit || !visible(fd)) return;
-      answers[fd.key] = A[fd.key];
+      if (fd.type === 'info' || fd.type === 'consent' || fd.type === 'file' || fd.noSubmit || !visible(fd)) return;
+      answers[fd.key] = A[fd.key];                                // 사진은 answers 가 아니라 files 로 간다 — 시트엔 서버가 드라이브 주소를 적는다
     });
     if (!byKey.src) answers.src = LINK.src;                    // 문항이 없으면 링크 값만 숨겨서 보낸다
     if (!byKey.ref && LINK.ref) answers.ref = LINK.ref;
@@ -336,6 +438,12 @@
       consentPrivacy: agreed('privacy'), consentMarketing: agreed('marketing'),
       website: document.getElementById('website').value
     };
+    var files = {}, anyFile = false;                              // 줄여 둔 사진을 본문에 같이 싣는다
+    FIELDS.forEach(function (fd) {
+      if (fd.type === 'file' && visible(fd) && FILES[fd.key]) { files[fd.key] = FILES[fd.key]; anyFile = true; }
+    });
+    if (anyFile) body.files = files;
+    body.consent = { version: F.consentVersion || '', items: consentItems() };
     sending = true; go.disabled = true; go.textContent = call(F.sendingLabel) || '보내는 중…';
     // text/plain 으로 보내야 브라우저가 사전 확인(preflight) 없이 바로 보낸다 — 다이어리 백엔드와 같은 방식
     var payload = JSON.stringify(body);
@@ -372,6 +480,7 @@
 
   function next() {
     if (sending) return;
+    if (encoding > 0) { setErr('사진을 줄이는 중이에요. 잠깐만 기다려 주세요.'); return; }
     if (!PREVIEW && closedNow()) { end('closed'); return; }
     FIELDS.forEach(function (fd) { if (fd._page === cur) readField(fd); });
     if (!validatePage()) return;
@@ -384,6 +493,7 @@
   function onChange(e) {
     var k = e.target.getAttribute('data-key'); if (!k) return;
     var fd = byKey[k];
+    if (fd.type === 'file') { if (e.type === 'change') pickFile(fd, e.target); return; }   // 사진은 고른 뒤에 한 번만
     if (fd.type === 'tel') e.target.value = e.target.value.replace(/[^\d]/g, '').slice(0, 11);
     if (fd.upper && e.target.value !== e.target.value.toUpperCase()) e.target.value = e.target.value.toUpperCase();
     readField(fd);
@@ -402,6 +512,13 @@
   app.addEventListener('click', function (e) {
     if (!e.target.closest) return;
     if (e.target.closest('[data-restart]')) { restart(); return; }
+    var rs = e.target.closest('[data-reshot]');                   // 「다시 고르기」 — 비우고 바로 고르는 창을 연다
+    if (rs) {
+      var rk = rs.getAttribute('data-reshot');
+      clearFile(rk); refresh();
+      var fi = app.querySelector('input[type="file"][data-key="' + rk + '"]'); if (fi) fi.click();
+      return;
+    }
     var bk = e.target.closest('[data-back]');
     if (bk) goBack((bk.getAttribute('data-back') || '').split(',').filter(function (x) { return x; }));
   });
