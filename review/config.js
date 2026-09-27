@@ -11,9 +11,11 @@
      ⛔ 광고·양식·완료화면에서 특정 리워드를 약속하지 않는다 — 약속한 것은 조건 없이 줘야 한다. */
 (function () {
 
-  /* ⬜ 고칠 곳 둘 — 정해지면 이 두 줄만 바꾸면 된다 ------------------------------ */
+  /* ⬜ 특강마다 고칠 곳 셋 — REPLAY · DEADLINE · ACCENT. ⚠️ 서버 신청폼_백엔드.gs FORMS.review.deadline 도 같은 시각으로 (9/28 오너) ---- */
   var REPLAY = '';                    // 다시보기 주소. **비워 두면 그 줄이 화면에 안 나온다** (2026-09-21 현재 미정)
   var DEADLINE = '2026-10-05T00:00:00+09:00';  // 마감 시각 — 10/4(일) 자정까지 받는다 (2026-09-27 오너 「후기는 10/4 자정까지 (10/4에서 10/5 넘어가는) 받고」) (예: '2026-10-08T23:59:59+09:00'). 비우면 마감 없이 계속 받는다
+  var ACCENT = '#6b4c9a';            // 머리띠 색 = 이번 특강의 강의색. 강의색은 02_콘텐츠/브랜드_컬러팔레트.md 5장(「강의 브랜드색」)
+                                      // 지금은 인생업(인공지능으로 생산성 레벨업) 보라. 9/28 오너 「마감일 수정하면서 컬러만 같이 바꿔줘」
   /* 캡처 칸 「누르면 펼쳐지는 안내」 — 비워 두면(null) 안 나온다. 문구는 술술이(04_강의/인생업2기/후기리워드폼_문구_260927.md) */
   var CAPTURE_HELP = {              // 문구: 술술이 9/27. 펼침 표시(▸)는 브라우저가 그려서 제목 끝 ▾ 는 뺐다
     title: '카카오톡 캡처하는 법',
@@ -47,7 +49,8 @@
           q + ' details.bogi>summary::after{content:"보기 ›"}' +
           q + ' details.bogi[open]>summary::after{content:"접기"}' +
           q + ' .bogi-body{margin:8px 0 0 29px;font-size:13px;color:var(--sub);line-height:1.6}';
-      }).join('');
+      }).join('') +
+      '.q[data-k="marketing"]{margin-bottom:30px !important}';   // 9/28 오너 「선택 동의 줄과 후기 보내기 버튼 사이 간격」
     (document.head || document.documentElement).appendChild(st);
   })();
   window.__agreeAll = function (on) {
@@ -68,7 +71,7 @@
     keepDraft: true,                  // 새로고침해도 쓰던 답이 남는다 — **사진은 빼고**(용량). 다시 고르셔야 한다
     privacyUrl: 'https://apply.btns.kr/privacy/',
     deadline: DEADLINE || undefined,
-    accent:   '#6b4c9a',
+    accent:   ACCENT,                 // 맨 위 ⬜ 고칠 곳에서 바꾼다
     eyebrow:  '부트니스',
     title:    '후기 리워드 신청',
     // heroLines 없음 — 9/28 오너 「제목 밑 부연설명은 지워줘. 다른 무료특강에서도 쓸 수 있게」
@@ -117,7 +120,7 @@
           var on = a && a.privacy === true && a.marketing === true;
           return '<b>' + AGREE_HEAD + '</b>' +
             '<label style="display:flex;gap:12px;align-items:center;margin-top:12px;cursor:pointer;font-weight:800;font-size:17.5px;color:var(--ink)">' +
-            '<input type="checkbox" style="width:26px;height:26px;margin:0;flex:none;accent-color:var(--ink)" ' + (on ? 'checked ' : '') +
+            '<input type="checkbox" style="width:19px;height:19px;margin:0;flex:none;accent-color:var(--ink)" ' + (on ? 'checked ' : '') +
             'onclick="window.__agreeAll(this.checked)"> 모두 동의하고 리워드 받기</label>';
         } },
 
