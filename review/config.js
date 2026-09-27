@@ -37,7 +37,17 @@
       '.q[data-k="privacy"] p:empty, .q[data-k="marketing"] p:empty { display: none !important; }' +
       '.q[data-k="privacy"] [data-tag], .q[data-k="marketing"] [data-tag] { display: none !important; }' +
       K.split(', ').map(function (q) { return q + '{margin:0 0 8px 18px;padding:0 0 8px 12px;border-bottom:0;border-left:2px solid #efe8d6}'; }).join('') +
-      K.split(', ').map(function (q) { return q + ' .consent input{width:19px;height:19px}' + q + ' .consent b{font-size:14.5px;font-weight:700}'; }).join('');
+      K.split(', ').map(function (q) { return q + ' .consent input{width:19px;height:19px}' + q + ' .consent b{font-size:14.5px;font-weight:700}'; }).join('') +
+      /* 「보기 ›」 — 라벨 같은 줄 오른쪽 끝, 작은 회색(9/28 오너 「자세히가 아래로 가니까 시선이 집중」 · 네이버·쿠팡 약관 모양) */
+      K.split(', ').map(function (q) {
+        return q + '{position:relative}' + q + ' .consent{padding-right:46px}' +
+          q + ' details.bogi{margin:0}' +
+          q + ' details.bogi>summary{position:absolute;top:1px;right:0;list-style:none;cursor:pointer;font-size:12.5px;color:var(--sub);padding:2px 0 2px 8px;line-height:1.5}' +
+          q + ' details.bogi>summary::-webkit-details-marker{display:none}' +
+          q + ' details.bogi>summary::after{content:"보기 ›"}' +
+          q + ' details.bogi[open]>summary::after{content:"접기"}' +
+          q + ' .bogi-body{margin:8px 0 0 29px;font-size:13px;color:var(--sub);line-height:1.6}';
+      }).join('');
     (document.head || document.documentElement).appendChild(st);
   })();
   window.__agreeAll = function (on) {
@@ -46,11 +56,11 @@
       if (el && el.checked !== on) { el.checked = on; el.dispatchEvent(new Event('change', { bubbles: true })); }
     });
   };
-  function folded(rows, summary) {                 // 표를 접힌 상자로 — 줄마다 「이름: 내용」
-    return '<details style="margin:6px 0 0 32px;font-size:13.5px;color:var(--sub)"><summary style="cursor:pointer">' +
-      (summary || '자세히') + '</summary>\n<div style="margin-top:6px;line-height:1.6">' +      // 줄바꿈 글자는 화면엔 안 보이고, 증거 글에선 칸 사이 띄어쓰기로 남는다
+  function folded(rows) {                          // 표를 접힌 상자로 — 「보기 ›」는 라벨 줄 오른쪽 끝(CSS 로 그림), 펼치면 라벨 아래로
+    return '<details class="bogi"><summary></summary>\n<div class="bogi-body">' +     // 줄바꿈 글자는 화면엔 안 보이고, 증거 글에선 칸 사이 띄어쓰기로 남는다
       rows.map(function (r) { return '<b>' + r[0] + '</b> ' + r[1]; }).join('<br>\n') + '</div></details>';
   }
+
 
   window.FORM = {
     formId:   'review',               // 백엔드 FORMS 의 키와 같아야 한다
@@ -65,7 +75,7 @@
 
     /* 동의 문구를 한 글자라도 고치면 이 번호를 올린다.
        동의 일시·문구 원문과 함께 시트에 적혀서, 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있다 */
-    consentVersion: '2026-09-27.6',
+    consentVersion: '2026-09-28.1',
 
     pages: [{ fields: [
       /* 문구는 술술이 것을 그대로 쓴다 — 04_강의/인생업2기/후기리워드_공지문안_261001.md 「폼·완료 화면 문구 셋」 */
