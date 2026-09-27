@@ -11,9 +11,10 @@
      ⛔ 광고·양식·완료화면에서 특정 리워드를 약속하지 않는다 — 약속한 것은 조건 없이 줘야 한다. */
 (function () {
 
-  /* ⬜ 특강마다 고칠 곳 셋 — REPLAY · DEADLINE · ACCENT. ⚠️ 서버 신청폼_백엔드.gs FORMS.review.deadline 도 같은 시각으로 (9/28 오너) ---- */
+  /* ⬜ 특강마다 고칠 곳 넷 — REPLAY · DEADLINE · LECTURE · ACCENT. ⚠️ 서버 신청폼_백엔드.gs FORMS.review.deadline 도 같은 시각으로 (9/28 오너) ---- */
   var REPLAY = '';                    // 다시보기 주소. **비워 두면 그 줄이 화면에 안 나온다** (2026-09-21 현재 미정)
   var DEADLINE = '2026-10-05T00:00:00+09:00';  // 마감 시각 — 10/4(일) 자정까지 받는다 (2026-09-27 오너 「후기는 10/4 자정까지 (10/4에서 10/5 넘어가는) 받고」) (예: '2026-10-08T23:59:59+09:00'). 비우면 마감 없이 계속 받는다
+  var LECTURE = 'AI로 컴퓨터 업무 자동화 하기';   // 맨 위 「부트니스」 옆에 붙는 강의명(9/28 오너). 특강마다 바꾼다
   var ACCENT = '#6b4c9a';            // 머리띠 색 = 이번 특강의 강의색. 강의색은 02_콘텐츠/브랜드_컬러팔레트.md 5장(「강의 브랜드색」)
                                       // 지금은 인생업(인공지능으로 생산성 레벨업) 보라. 9/28 오너 「마감일 수정하면서 컬러만 같이 바꿔줘」
   /* 캡처 칸 「누르면 펼쳐지는 안내」 — 비워 두면(null) 안 나온다. 문구는 술술이(04_강의/인생업2기/후기리워드폼_문구_260927.md) */
@@ -58,6 +59,46 @@
       '.q[data-k="marketing"] .err{margin:10px 0 0 !important;font-size:14px;font-weight:700;color:var(--err)}';   // 9/28 오너 「선택 동의 줄과 후기 보내기 버튼 사이 간격」
     (document.head || document.documentElement).appendChild(st);
   })();
+  /* 9/28 오너: 「모두 동의를 권하는 메시지는 팝업으로. 지금은 눈에 너무 안 띄어서 버튼이 작동 안 하는 것처럼 느껴져」.
+     엔진은 「후기 보내기」를 폼 submit 으로 받는다 → 문서 단계에서 그 신호를 먼저 가로채, 두 동의가 없으면
+     가운데 팝업을 띄우고 제출을 멈춘다(엔진은 그대로). 빨간 한 줄도 같이 켜 둔다 — 팝업을 닫은 뒤 어디를 봐야 하는지 */
+  var POPUP_MSG = '모두 동의하지 않으면 후기 리워드를 받으실 수 없어요.';
+  function consentOk() {
+    var p = document.querySelector('input[data-key="privacy"]'), m = document.querySelector('input[data-key="marketing"]');
+    return !!(p && p.checked && m && m.checked);
+  }
+  function popup() {
+    var box = document.getElementById('agreePopup');
+    if (!box) {
+      box = document.createElement('div'); box.id = 'agreePopup';
+      box.setAttribute('role', 'alertdialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'agreePopupMsg');
+      box.style.cssText = 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(30,30,30,.45)';
+      box.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:320px;width:100%;padding:26px 22px 18px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.18)">' +
+        '<p id="agreePopupMsg" style="margin:0 0 20px;font-size:16.5px;font-weight:700;line-height:1.55;color:var(--ink);word-break:keep-all">' + POPUP_MSG + '</p>' +
+        '<button type="button" id="agreePopupOk" style="width:100%;font:inherit;font-size:16px;font-weight:700;padding:13px 0;border:0;border-radius:12px;background:#f4d017;color:#1e2a33;cursor:pointer">확인</button></div>';
+      document.body.appendChild(box);
+      var close = function () {
+        box.style.display = 'none';
+        var t = document.querySelector('.q[data-k="agreeAll"]');
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'center' });   // 닫으면 동의 칸으로
+      };
+      box.querySelector('#agreePopupOk').addEventListener('click', close);
+      box.addEventListener('click', function (e) { if (e.target === box) close(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.style.display !== 'none') close(); });
+    }
+    box.style.display = 'flex';
+    box.querySelector('#agreePopupOk').focus();
+  }
+  document.addEventListener('submit', function (e) {
+    var p = document.querySelector('input[data-key="privacy"]');
+    if (!p || !e.target.contains(p) || consentOk()) return;       // 이 폼·동의가 다 됐으면 엔진에 그대로 넘긴다
+    e.preventDefault(); e.stopImmediatePropagation();
+    ['privacy', 'marketing'].forEach(function (k) {
+      var el = document.querySelector('input[data-key="' + k + '"]'), q = el && el.closest('.q');
+      if (q && !el.checked) q.classList.add('bad');                 // 빨간 한 줄도 켠다
+    });
+    popup();
+  }, true);
   window.__agreeAll = function (on) {
     ['privacy', 'marketing'].forEach(function (k) {
       var el = document.querySelector('input[data-key="' + k + '"]');
@@ -77,13 +118,13 @@
     privacyUrl: 'https://apply.btns.kr/privacy/',
     deadline: DEADLINE || undefined,
     accent:   ACCENT,                 // 맨 위 ⬜ 고칠 곳에서 바꾼다
-    eyebrow:  '부트니스',
+    eyebrow:  '부트니스 · ' + LECTURE,   // 9/28 오너 「무료특강 강의명을 맨 상단 부트니스 옆에」
     title:    '후기 리워드 신청',
     // heroLines 없음 — 9/28 오너 「제목 밑 부연설명은 지워줘. 다른 무료특강에서도 쓸 수 있게」
 
     /* 동의 문구를 한 글자라도 고치면 이 번호를 올린다.
        동의 일시·문구 원문과 함께 시트에 적혀서, 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있다 */
-    consentVersion: '2026-09-28.2',
+    consentVersion: '2026-09-28.3',
 
     pages: [{ fields: [
       /* 문구는 술술이 것을 그대로 쓴다 — 04_강의/인생업2기/후기리워드_공지문안_261001.md 「폼·완료 화면 문구 셋」 */
