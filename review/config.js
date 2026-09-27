@@ -99,6 +99,8 @@
     });
     popup();
   }, true);
+  /* 빨간 굵은 글씨 — .paybox b 는 19px 로 키우는 규칙이 있어 크기는 둘레 글자를 따르게 한다 */
+  function RED(t) { return '<b style="color:#d93025;font-size:inherit;font-weight:800">' + t + '</b>'; }
   /* 처리한 날 — 서버가 준 처리 시각(res.at 「YYYY-MM-DD HH:mm」)을 「YYYY년 M월 D일」로. 없으면(미리보기) 오늘 */
   function agreedOn(res) {
     var m = String((res && res.at) || '').match(/^(\d{4})-(\d{2})-(\d{2})/), d = new Date();
@@ -215,7 +217,7 @@
       var mk = res && res.marketing !== undefined ? res.marketing === true : (a && a.marketing === true) || !!(res && res.preview);   // 미리보기(?preview=done)도 동의 화면으로 — 동의는 필수라 실제로는 이 화면뿐이다
       if (mk) return {                                              // 9/28 오너 지시: 안내 두 줄을 상자 안에(paybox 모양을 빌린다)
         title: '후기 잘 받았습니다. 감사합니다. 😊',
-        html: '<span class="paybox" style="word-break:keep-all">리워드는 후기 리워드 신청기간 종료 후 2~3일 이내에 발송됩니다.<br>' +
+        html: '<span class="paybox" style="word-break:keep-all">' + RED('리워드는') + ' 후기 리워드 신청기간 종료 후 ' + RED('2~3일 이내에 발송') + '됩니다.<br>' +   // 9/28 오너: 두 곳 빨간 굵은 글씨
               '부트니스에서는 여러분께 도움이 되는 강의를 준비하기 위해 늘 노력하고 있습니다.</span>',
         button: REPLAY ? { label: '다시보기 보러 가기', href: REPLAY } : null,
         tail: '<span style="font-size:12.5px;color:var(--sub);line-height:1.6;word-break:keep-all">' +
