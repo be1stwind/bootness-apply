@@ -213,12 +213,12 @@
          이 폼은 메일을 안 보내니 이 화면이 그 몫을 한다 */
       var at = (res && res.at) ? ' <span class="when">(' + res.at + ' 처리)</span>' : '';
       var mk = res && res.marketing !== undefined ? res.marketing === true : (a && a.marketing === true) || !!(res && res.preview);   // 미리보기(?preview=done)도 동의 화면으로 — 동의는 필수라 실제로는 이 화면뿐이다
-      if (mk) return {                                              // 9/28 오너 지시로 문구를 바꾸고 아래 안내 상자를 뺐다
-        title: '후기 잘 받았어요. 고맙습니다 😊',
-        html: '리워드는 후기 리워드 신청기간 종료 후 2~3일 이내에 발송됩니다.',
+      if (mk) return {                                              // 9/28 오너 지시: 안내 두 줄을 상자 안에(paybox 모양을 빌린다)
+        title: '후기 잘 받았습니다. 감사합니다. 😊',
+        html: '<span class="paybox" style="word-break:keep-all">리워드는 후기 리워드 신청기간 종료 후 2~3일 이내에 발송됩니다.<br>' +
+              '부트니스에서는 여러분께 도움이 되는 강의를 준비하기 위해 늘 노력하고 있습니다.</span>',
         button: REPLAY ? { label: '다시보기 보러 가기', href: REPLAY } : null,
-        tail: '부트니스에서는 여러분께 도움이 되는 강의를 준비하기 위해 늘 노력하고 있습니다.' +
-              '<br><br><span style="font-size:12.5px;color:var(--sub);line-height:1.6;word-break:keep-all">' +
+        tail: '<span style="font-size:12.5px;color:var(--sub);line-height:1.6;word-break:keep-all">' +
               '[광고성 정보 수신동의 처리 결과]<br>귀하는 ' + agreedOn(res) + ' 부트니스의 광고성 정보 수신에 동의하셨으며, 수신동의 처리가 완료되었습니다.</span>'
         /* ↑ 수신동의 처리 결과 알림 — 정보통신망법 제50조 제7항 · 시행령 제62조의2: ① 보내는 곳 이름 ② 동의 사실과 날짜 ③ 처리 결과를
              **14일 안에** 알려야 한다(어기면 1천만원 이하 과태료). 방법은 제한이 없어 완료 화면에 둔다. 광고 문구를 섞으면 안 된다.
