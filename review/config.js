@@ -30,7 +30,14 @@
      테두리 있는 빈 문단만 남는다(9/27 밤 오너 「그 위에 빈 박스는 왜 둔거야?」). 엔진은 그대로 두고 이 폼에서만 빈 문단을 숨긴다 */
   (function () {
     var st = document.createElement('style');
-    st.textContent = '.q[data-k="privacy"] p:empty, .q[data-k="marketing"] p:empty { display: none !important; }';
+    /* 9/27 밤 오너: 「[선택] 앞에 있는데 뒤에 선택을 또 쓸 필요 없잖아」 → 엔진이 붙이는 꼬리표(선택·*)를 이 두 칸에서만 숨긴다.
+       「모두 동의 체크박스가 더 작아서 위계가 뒤틀린 느낌」 → 두 칸은 줄이고 들여써서 딸린 항목으로 */
+    var K = '.q[data-k="privacy"], .q[data-k="marketing"]';
+    st.textContent =
+      '.q[data-k="privacy"] p:empty, .q[data-k="marketing"] p:empty { display: none !important; }' +
+      '.q[data-k="privacy"] [data-tag], .q[data-k="marketing"] [data-tag] { display: none !important; }' +
+      K.split(', ').map(function (q) { return q + '{margin:0 0 8px 18px;padding:0 0 8px 12px;border-bottom:0;border-left:2px solid #efe8d6}'; }).join('') +
+      K.split(', ').map(function (q) { return q + ' .consent input{width:19px;height:19px}' + q + ' .consent b{font-size:14.5px;font-weight:700}'; }).join('');
     (document.head || document.documentElement).appendChild(st);
   })();
   window.__agreeAll = function (on) {
@@ -58,7 +65,7 @@
 
     /* 동의 문구를 한 글자라도 고치면 이 번호를 올린다.
        동의 일시·문구 원문과 함께 시트에 적혀서, 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있다 */
-    consentVersion: '2026-09-27.5',
+    consentVersion: '2026-09-27.6',
 
     pages: [{ fields: [
       /* 문구는 술술이 것을 그대로 쓴다 — 04_강의/인생업2기/후기리워드_공지문안_261001.md 「폼·완료 화면 문구 셋」 */
@@ -99,14 +106,14 @@
       { key: 'agreeAll', type: 'info', cls: 'agree-all', html: function (a) {
           var on = a && a.privacy === true && a.marketing === true;
           return '<b>' + AGREE_HEAD + '</b>' +
-            '<label style="display:flex;gap:10px;align-items:center;margin-top:10px;cursor:pointer;font-weight:700">' +
-            '<input type="checkbox" style="width:20px;height:20px" ' + (on ? 'checked ' : '') +
+            '<label style="display:flex;gap:12px;align-items:center;margin-top:12px;cursor:pointer;font-weight:800;font-size:17.5px;color:var(--ink)">' +
+            '<input type="checkbox" style="width:26px;height:26px;margin:0;flex:none;accent-color:var(--ink)" ' + (on ? 'checked ' : '') +
             'onclick="window.__agreeAll(this.checked)"> 모두 동의하고 리워드 받기</label>';
         } },
 
       /* 동의 칸 문구 — 공문서체(9/27 밤 오너 「요로 끝나는 말투 쓰지 말고 공문서처럼」) · 문안 술술이.
          수집·이용은 [필수] — 안 누르면 제출이 막힌다(서버도 거절). (가) 오너 확정 */
-      { key: 'privacy', type: 'consent', label: '[필수] 개인정보 수집·이용 동의 — 리워드 지급 및 안내', required: true,
+      { key: 'privacy', type: 'consent', label: '[필수] 개인정보 수집·이용 동의', required: true,
         err: '리워드를 받으시려면 개인정보 수집·이용에 동의하셔야 합니다.',
         notice: folded([['수집 항목', '성함, 무료특강방 닉네임, 휴대폰 번호, 이메일, 후기 캡처'],
                         ['이용 목적', '후기 리워드 지급 및 안내'],
@@ -119,7 +126,7 @@
             이 폼은 야간 동의를 받지 않는다. 예외는 전자우편뿐이다 */
       /* 오너 9/27: 「동의칸만 남겨놓고 동의하지 않으면 리워드는 지급되지 않습니다. 라고 적어줘」.
          칸은 **선택 그대로**(required 없음) — 안 눌러도 제출은 된다. 제22조 제5항 위험은 오너가 알고 정하셨다(한결 전달) */
-      { key: 'marketing', type: 'consent', label: '[선택] 소식·광고 수신 동의 — 새 강의·무료특강·할인 안내',
+      { key: 'marketing', type: 'consent', label: '[선택] 소식·광고 수신 동의',
         notice: folded([['수집 항목', '성함, 휴대폰 번호, 이메일'],
                         ['이용 목적', '새 강의·무료특강·할인·모집 소식 등 광고성 정보 전송'],
                         ['전송 방법', '카카오톡, 문자, 이메일'],
