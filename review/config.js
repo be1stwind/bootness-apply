@@ -25,7 +25,14 @@
      · 체크는 **둘 그대로** 둔다(제22조 제1항 — 홍보 동의는 구분해 각각). 「모두 동의」는 두 칸을 대신 눌러 주는 단추일 뿐 따로 저장하지 않는다.
      · 엔진이 칸을 다시 그릴 때마다 「모두 동의」도 두 칸 상태로 다시 그려진다 → 둘 다 켜지면 저절로 켜진다.
      · 긴 설명은 접어 둔다. 동의 증거(동의문구원문)에는 접혀 있어도 글자가 그대로 남는다(엔진이 태그만 걷어 낸다) */
-  var AGREE_HEAD = '두 항목에 모두 동의하셔야 리워드가 지급됩니다.<br>동의하지 않으시면 리워드는 지급되지 않습니다.';   // 술술이 「9/27 밤 판」 · 오너 확정 (가)
+  var AGREE_HEAD = '<span style="color:var(--err)">두 항목에 모두 동의</span>하셔야 리워드가 지급됩니다.';   // 9/27 밤 오너: 한 줄만 · 「두 항목에 모두 동의」 빨간 글씨(오류 글씨와 같은 색)
+  /* 빈 상자 없애기 — 엔진은 동의 설명을 <p class="agree-note"> 로 감싸는데, 접는 <details> 는 문단 안에 못 들어가서
+     테두리 있는 빈 문단만 남는다(9/27 밤 오너 「그 위에 빈 박스는 왜 둔거야?」). 엔진은 그대로 두고 이 폼에서만 빈 문단을 숨긴다 */
+  (function () {
+    var st = document.createElement('style');
+    st.textContent = '.q[data-k="privacy"] p:empty, .q[data-k="marketing"] p:empty { display: none !important; }';
+    (document.head || document.documentElement).appendChild(st);
+  })();
   window.__agreeAll = function (on) {
     ['privacy', 'marketing'].forEach(function (k) {
       var el = document.querySelector('input[data-key="' + k + '"]');
@@ -51,7 +58,7 @@
 
     /* 동의 문구를 한 글자라도 고치면 이 번호를 올린다.
        동의 일시·문구 원문과 함께 시트에 적혀서, 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있다 */
-    consentVersion: '2026-09-27.4',
+    consentVersion: '2026-09-27.5',
 
     pages: [{ fields: [
       /* 문구는 술술이 것을 그대로 쓴다 — 04_강의/인생업2기/후기리워드_공지문안_261001.md 「폼·완료 화면 문구 셋」 */
