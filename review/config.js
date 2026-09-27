@@ -52,7 +52,10 @@
           q + ' details.bogi[open]>summary::after{content:"접기"}' +
           q + ' .bogi-body{margin:8px 0 0 29px;font-size:13px;color:var(--sub);line-height:1.6}';
       }).join('') +
-      '.q[data-k="marketing"]{margin-bottom:30px !important}';   // 9/28 오너 「선택 동의 줄과 후기 보내기 버튼 사이 간격」
+      '.q[data-k="marketing"]{margin-bottom:30px !important}' +
+      '.q[data-k="privacy"] .err{display:none !important}' +
+      '.q[data-k="privacy"].bad ~ .q[data-k="marketing"] .err{display:block}' +
+      '.q[data-k="marketing"] .err{margin:10px 0 0 !important;font-size:14px;font-weight:700;color:var(--err)}';   // 9/28 오너 「선택 동의 줄과 후기 보내기 버튼 사이 간격」
     (document.head || document.documentElement).appendChild(st);
   })();
   window.__agreeAll = function (on) {
@@ -80,7 +83,7 @@
 
     /* 동의 문구를 한 글자라도 고치면 이 번호를 올린다.
        동의 일시·문구 원문과 함께 시트에 적혀서, 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있다 */
-    consentVersion: '2026-09-28.1',
+    consentVersion: '2026-09-28.2',
 
     pages: [{ fields: [
       /* 문구는 술술이 것을 그대로 쓴다 — 04_강의/인생업2기/후기리워드_공지문안_261001.md 「폼·완료 화면 문구 셋」 */
@@ -129,7 +132,7 @@
       /* 동의 칸 문구 — 공문서체(9/27 밤 오너 「요로 끝나는 말투 쓰지 말고 공문서처럼」) · 문안 술술이.
          수집·이용은 [필수] — 안 누르면 제출이 막힌다(서버도 거절). (가) 오너 확정 */
       { key: 'privacy', type: 'consent', label: '[필수] 개인정보 수집·이용 동의', required: true,
-        err: '리워드를 받으시려면 개인정보 수집·이용에 동의하셔야 합니다.',
+        err: ' ',                  // 오류 글은 아래 소식·광고 칸 밑 한 줄로 합친다(9/28 오너)
         notice: folded([['수집 항목', '성함, 무료특강방 닉네임, 휴대폰 번호, 이메일, 후기 캡처'],
                         ['이용 목적', '후기 리워드 지급 및 안내'],
                         ['보유 기간', '수집일로부터 3년간 보관하며, 기간 경과 후 파기합니다.'],
@@ -140,8 +143,12 @@
          ⛔ 밤 9시~아침 8시에는 문자·알림톡을 보내지 않는다 (정보통신망법 제50조 제3항 — 야간 동의는 따로 받아야 한다).
             이 폼은 야간 동의를 받지 않는다. 예외는 전자우편뿐이다 */
       /* 오너 9/27: 「동의칸만 남겨놓고 동의하지 않으면 리워드는 지급되지 않습니다. 라고 적어줘」.
-         칸은 **선택 그대로**(required 없음) — 안 눌러도 제출은 된다. 제22조 제5항 위험은 오너가 알고 정하셨다(한결 전달) */
-      { key: 'marketing', type: 'consent', label: '[선택] 소식·광고 수신 동의',
+         (9/27 판에서는 안 눌러도 제출됐다. 9/28 부터는 제출이 막힌다 — 아래 칸 설명) 제22조 제5항 위험은 오너가 알고 정하셨다(한결 전달) */
+      /* 9/28 오너: 「모두 동의를 하지 않은 상태에서 후기 보내기를 누르면 그 자리에서 … 경고창이 뜨면서 제출을 못하게 막아줘」.
+         → 이 칸도 안 누르면 제출이 막힌다(서버도 거절). 칸 이름 「[선택]」은 오너 답으로 그대로 둔다.
+         경고는 브라우저 팝업 대신 이 칸 바로 밑 빨간 한 줄 + 그 자리로 스크롤(엔진이 해 준다) */
+      { key: 'marketing', type: 'consent', label: '[선택] 소식·광고 수신 동의', required: true,
+        err: '모두 동의하지 않으면 후기 리워드를 받으실 수 없어요.',
         notice: folded([['수집 항목', '성함, 휴대폰 번호, 이메일'],
                         ['이용 목적', '새 강의·무료특강·할인·모집 소식 등 광고성 정보 전송'],
                         ['전송 방법', '카카오톡, 문자, 이메일'],
