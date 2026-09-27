@@ -62,7 +62,7 @@
   /* 9/28 오너: 「모두 동의를 권하는 메시지는 팝업으로. 지금은 눈에 너무 안 띄어서 버튼이 작동 안 하는 것처럼 느껴져」.
      엔진은 「후기 보내기」를 폼 submit 으로 받는다 → 문서 단계에서 그 신호를 먼저 가로채, 두 동의가 없으면
      가운데 팝업을 띄우고 제출을 멈춘다(엔진은 그대로). 빨간 한 줄도 같이 켜 둔다 — 팝업을 닫은 뒤 어디를 봐야 하는지 */
-  var POPUP_MSG = '모두 동의하지 않으면 후기 리워드를 받으실 수 없습니다.';
+  var POPUP_MSG = '모두 동의하지 않으면 후기 리워드를<br>받으실 수 없습니다.';   // 9/28 오너: 「리워드를」 뒤 줄바꿈
   function consentOk() {
     var p = document.querySelector('input[data-key="privacy"]'), m = document.querySelector('input[data-key="marketing"]');
     return !!(p && p.checked && m && m.checked);
@@ -118,7 +118,7 @@
     privacyUrl: 'https://apply.btns.kr/privacy/',
     deadline: DEADLINE || undefined,
     accent:   ACCENT,                 // 맨 위 ⬜ 고칠 곳에서 바꾼다
-    eyebrow:  '부트니스 · ' + LECTURE,   // 9/28 오너 「무료특강 강의명을 맨 상단 부트니스 옆에」
+    eyebrow:  '부트니스 「' + LECTURE + '」',   // 9/28 오너 「무료특강 강의명을 맨 상단 부트니스 옆에」
     title:    '후기 리워드 신청',
     // heroLines 없음 — 9/28 오너 「제목 밑 부연설명은 지워줘. 다른 무료특강에서도 쓸 수 있게」
 
@@ -157,7 +157,7 @@
 
       { key: 'shot', type: 'file', label: '단톡방 후기 캡처를 올려 주세요', required: true,
         pickLabel: '캡처 고르기',
-        hint: '방 이름이 보이게 찍어 주시면 확인이 빠릅니다. 말풍선만 잘린 캡처는 확인이 어려워 다시 여쭙게 됩니다.' +
+        hint: '말풍선만 잘린 캡처는 확인이 어려워 다시 여쭙게 됩니다.' +   // 「방 이름이 보이게 …」 줄은 9/28 오너 지시로 뺐다
               (CAPTURE_HELP ? '<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:600;color:var(--ink)">' +
                 CAPTURE_HELP.title + '</summary><div style="margin-top:6px">' + CAPTURE_HELP.body + '</div></details>' : ''),
         err: '후기 캡처를 올려 주세요' },
@@ -208,13 +208,12 @@
          이 폼은 메일을 안 보내니 이 화면이 그 몫을 한다 */
       var at = (res && res.at) ? ' <span class="when">(' + res.at + ' 처리)</span>' : '';
       var mk = res && res.marketing !== undefined ? res.marketing === true : (a && a.marketing === true);
-      if (mk) return {
-        title: '후기 잘 받았어요. 고맙습니다 🙏',
-        html: '확인되는 대로 리워드를 보내 드릴게요.',
+      if (mk) return {                                              // 9/28 오너 지시로 문구를 바꾸고 아래 안내 상자를 뺐다
+        title: '후기 잘 받았어요. 고맙습니다 😊',
+        html: '리워드는 후기 리워드 신청기간 종료 후 2~3일 이내에 발송됩니다.',
         button: REPLAY ? { label: '다시보기 보러 가기', href: REPLAY } : null,
-        tail: '아직 못 보신 분이 계시면 방에 한 번 더 나눠 주세요.<br>그 한 줄이 다음 분을 데려옵니다.',
-        note: '강의·특강 소식 받기에 <b>동의하신 것으로</b> 처리했습니다.' + at +
-              '<br>언제든 <a href="https://apply.btns.kr/optout/">그만 받기</a>에서 멈추실 수 있습니다.'
+        tail: '부트니스에서는 여러분께 도움이 되는 강의를 준비하기 위해 늘 노력하고 있습니다.'
+        // note(동의 처리 결과 상자)는 9/28 오너 「박스와 박스 안 텍스트 모두 지워줘」로 뺐다 — 제50조 제7항 처리결과 고지 자리였다
       };
       return {
         title: '후기 고맙습니다 🙏',
