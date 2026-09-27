@@ -38,13 +38,15 @@
     st.textContent =
       '.q[data-k="privacy"] p:empty, .q[data-k="marketing"] p:empty { display: none !important; }' +
       '.q[data-k="privacy"] [data-tag], .q[data-k="marketing"] [data-tag] { display: none !important; }' +
-      K.split(', ').map(function (q) { return q + '{margin:0 0 8px 18px;padding:0 0 8px 12px;border-bottom:0;border-left:2px solid #efe8d6}'; }).join('') +
+      K.split(', ').map(function (q) { return q + '{margin:0 0 8px 14px;padding:0 0 8px 12px;border-bottom:0;border-left:2px solid #efe8d6}'; }).join('') +
       K.split(', ').map(function (q) { return q + ' .consent input{width:19px;height:19px}' + q + ' .consent b{font-size:14.5px;font-weight:700}'; }).join('') +
       /* 「보기 ›」 — 라벨 같은 줄 오른쪽 끝, 작은 회색(9/28 오너 「자세히가 아래로 가니까 시선이 집중」 · 네이버·쿠팡 약관 모양) */
       K.split(', ').map(function (q) {
-        return q + '{position:relative}' + q + ' .consent{padding-right:46px}' +
+        return q + '{position:relative}' + q + ' .consent{padding-right:57px}' +   // 「보기」 폭 + 오른쪽 여백만큼 라벨이 비켜 준다
           q + ' details.bogi{margin:0}' +
-          q + ' details.bogi>summary{position:absolute;top:1px;right:0;list-style:none;cursor:pointer;font-size:12.5px;color:var(--sub);padding:2px 0 2px 8px;line-height:1.5}' +
+          /* 9/28 오너 「필수·선택이 왼쪽에서 떨어진 만큼 보기도 오른쪽에서」 → 좌우 14px 대칭.
+             18px 로 맞추면 360폭(갤럭시)에서 [필수] 라벨이 두 줄로 꺾여 14px 로 둘 다 맞췄다 */
+          q + ' details.bogi>summary{position:absolute;top:1px;right:14px;list-style:none;cursor:pointer;font-size:12.5px;color:var(--sub);padding:2px 0 2px 8px;line-height:1.5}' +
           q + ' details.bogi>summary::-webkit-details-marker{display:none}' +
           q + ' details.bogi>summary::after{content:"보기 ›"}' +
           q + ' details.bogi[open]>summary::after{content:"접기"}' +
