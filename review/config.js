@@ -21,6 +21,23 @@
   };
   /* ---------------------------------------------------------------------------- */
 
+  /* ── 동의 묶음(9/27 밤 오너: 「두 개를 … 합쳐」) — 엔진은 그대로, 이 폼에만 붙인다 ───────────────
+     · 체크는 **둘 그대로** 둔다(제22조 제1항 — 홍보 동의는 구분해 각각). 「모두 동의」는 두 칸을 대신 눌러 주는 단추일 뿐 따로 저장하지 않는다.
+     · 엔진이 칸을 다시 그릴 때마다 「모두 동의」도 두 칸 상태로 다시 그려진다 → 둘 다 켜지면 저절로 켜진다.
+     · 긴 설명은 접어 둔다. 동의 증거(동의문구원문)에는 접혀 있어도 글자가 그대로 남는다(엔진이 태그만 걷어 낸다) */
+  var AGREE_HEAD = '두 항목에 모두 동의하셔야 리워드가 지급됩니다.<br>동의하지 않으시면 리워드는 지급되지 않습니다.';   // 술술이 「9/27 밤 판」 · 오너 확정 (가)
+  window.__agreeAll = function (on) {
+    ['privacy', 'marketing'].forEach(function (k) {
+      var el = document.querySelector('input[data-key="' + k + '"]');
+      if (el && el.checked !== on) { el.checked = on; el.dispatchEvent(new Event('change', { bubbles: true })); }
+    });
+  };
+  function folded(rows, summary) {                 // 표를 접힌 상자로 — 줄마다 「이름: 내용」
+    return '<details style="margin:6px 0 0 32px;font-size:13.5px;color:var(--sub)"><summary style="cursor:pointer">' +
+      (summary || '자세히') + '</summary>\n<div style="margin-top:6px;line-height:1.6">' +      // 줄바꿈 글자는 화면엔 안 보이고, 증거 글에선 칸 사이 띄어쓰기로 남는다
+      rows.map(function (r) { return '<b>' + r[0] + '</b> ' + r[1]; }).join('<br>\n') + '</div></details>';
+  }
+
   window.FORM = {
     formId:   'review',               // 백엔드 FORMS 의 키와 같아야 한다
     endpoint: 'https://script.google.com/macros/s/AKfycbxjd7-hFlao-hi2A-kB4Rg1OC1NbCBneBieqWA9lCkKUWk3c1Gv7D3hNlpKf6VloYnF/exec',
@@ -34,7 +51,7 @@
 
     /* 동의 문구를 한 글자라도 고치면 이 번호를 올린다.
        동의 일시·문구 원문과 함께 시트에 적혀서, 나중에 「그때 뭐라고 쓰여 있었나」를 되읽을 수 있다 */
-    consentVersion: '2026-09-27.2',
+    consentVersion: '2026-09-27.4',
 
     pages: [{ fields: [
       /* 문구는 술술이 것을 그대로 쓴다 — 04_강의/인생업2기/후기리워드_공지문안_261001.md 「폼·완료 화면 문구 셋」 */
@@ -72,12 +89,22 @@
                 CAPTURE_HELP.title + '</summary><div style="margin-top:6px">' + CAPTURE_HELP.body + '</div></details>' : ''),
         err: '후기 캡처를 올려 주세요' },
 
-      { key: 'privacy', type: 'consent', label: '개인정보 수집·이용에 동의합니다', required: true,
-        err: '개인정보 수집·이용에 동의해야 리워드를 보내 드릴 수 있어요',
-        notice: [['수집 항목', '성함, 무료특강방 닉네임, 휴대폰 번호, 이메일, 후기 캡처'],
-                 ['이용 목적', '후기 리워드 지급 및 안내'],
-                 ['보관 기간', '받은 날부터 3년, 그 뒤 파기'],
-                 ['동의 거부', '동의하지 않으실 수 있지만, 그러면 리워드를 보내 드릴 수 없어요']] },
+      { key: 'agreeAll', type: 'info', cls: 'agree-all', html: function (a) {
+          var on = a && a.privacy === true && a.marketing === true;
+          return '<b>' + AGREE_HEAD + '</b>' +
+            '<label style="display:flex;gap:10px;align-items:center;margin-top:10px;cursor:pointer;font-weight:700">' +
+            '<input type="checkbox" style="width:20px;height:20px" ' + (on ? 'checked ' : '') +
+            'onclick="window.__agreeAll(this.checked)"> 모두 동의하고 리워드 받기</label>';
+        } },
+
+      /* 동의 칸 문구 — 공문서체(9/27 밤 오너 「요로 끝나는 말투 쓰지 말고 공문서처럼」) · 문안 술술이.
+         수집·이용은 [필수] — 안 누르면 제출이 막힌다(서버도 거절). (가) 오너 확정 */
+      { key: 'privacy', type: 'consent', label: '[필수] 개인정보 수집·이용 동의 — 리워드 지급 및 안내', required: true,
+        err: '리워드를 받으시려면 개인정보 수집·이용에 동의하셔야 합니다.',
+        notice: folded([['수집 항목', '성함, 무료특강방 닉네임, 휴대폰 번호, 이메일, 후기 캡처'],
+                        ['이용 목적', '후기 리워드 지급 및 안내'],
+                        ['보유 기간', '수집일로부터 3년간 보관하며, 기간 경과 후 파기합니다.'],
+                        ['동의 거부', '동의를 거부할 수 있으나, 거부 시 신청서를 제출할 수 없으며 리워드가 지급되지 않습니다.']]) },
 
       /* [선택] 광고성 정보 수신 — 이 폼의 진짜 목적. 없으면 6개월 뒤에는 연락드릴 길이 없다.
          ⛔ 필수로 걸 수 없다 (개인정보 보호법 제22조 제5항 — 동의하지 않는다고 서비스를 거부하면 안 된다).
@@ -85,13 +112,12 @@
             이 폼은 야간 동의를 받지 않는다. 예외는 전자우편뿐이다 */
       /* 오너 9/27: 「동의칸만 남겨놓고 동의하지 않으면 리워드는 지급되지 않습니다. 라고 적어줘」.
          칸은 **선택 그대로**(required 없음) — 안 눌러도 제출은 된다. 제22조 제5항 위험은 오너가 알고 정하셨다(한결 전달) */
-      { key: 'marketing', type: 'consent', label: '[선택] 부트니스 소식·광고 받아볼게요 — 새 강의·무료특강·할인 안내',
-        notice: [['수집 항목', '성함, 휴대폰 번호, 이메일'],
-                 ['받는 내용', '부트니스의 새 강의·무료특강·할인·모집 소식 (광고성 정보)'],
-                 ['받는 방법', '카카오톡, 문자, 이메일'],
-                 ['보관 기간', '동의하신 날부터 3년. 그 전에도 언제든 그만 받을 수 있어요'],
-                 ['그만 받기', 'apply.btns.kr/optout 에서 번호만 적으시면 바로 처리돼요'],
-                 ['리워드', '동의하지 않으시면 리워드는 지급되지 않습니다.']] }
+      { key: 'marketing', type: 'consent', label: '[선택] 소식·광고 수신 동의 — 새 강의·무료특강·할인 안내',
+        notice: folded([['수집 항목', '성함, 휴대폰 번호, 이메일'],
+                        ['이용 목적', '새 강의·무료특강·할인·모집 소식 등 광고성 정보 전송'],
+                        ['전송 방법', '카카오톡, 문자, 이메일'],
+                        ['보유 기간', '동의일로부터 3년간 보관합니다.'],
+                        ['동의 거부', '동의를 거부할 수 있으나, 거부 시 리워드가 지급되지 않습니다.']]) }
     ] }],
 
     submitLabel: '후기 보내기',
