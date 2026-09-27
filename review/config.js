@@ -99,6 +99,11 @@
     });
     popup();
   }, true);
+  /* 처리한 날 — 서버가 준 처리 시각(res.at 「YYYY-MM-DD HH:mm」)을 「YYYY년 M월 D일」로. 없으면(미리보기) 오늘 */
+  function agreedOn(res) {
+    var m = String((res && res.at) || '').match(/^(\d{4})-(\d{2})-(\d{2})/), d = new Date();
+    return m ? (m[1] + '년 ' + (+m[2]) + '월 ' + (+m[3]) + '일') : (d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일');
+  }
   window.__agreeAll = function (on) {
     ['privacy', 'marketing'].forEach(function (k) {
       var el = document.querySelector('input[data-key="' + k + '"]');
@@ -207,13 +212,17 @@
          맨 아랫줄은 **소식 받기를 어떻게 처리했는지** 알린다 — 정보통신망법 제50조 제7항(처리 결과를 알려야 한다).
          이 폼은 메일을 안 보내니 이 화면이 그 몫을 한다 */
       var at = (res && res.at) ? ' <span class="when">(' + res.at + ' 처리)</span>' : '';
-      var mk = res && res.marketing !== undefined ? res.marketing === true : (a && a.marketing === true);
+      var mk = res && res.marketing !== undefined ? res.marketing === true : (a && a.marketing === true) || !!(res && res.preview);   // 미리보기(?preview=done)도 동의 화면으로 — 동의는 필수라 실제로는 이 화면뿐이다
       if (mk) return {                                              // 9/28 오너 지시로 문구를 바꾸고 아래 안내 상자를 뺐다
         title: '후기 잘 받았어요. 고맙습니다 😊',
         html: '리워드는 후기 리워드 신청기간 종료 후 2~3일 이내에 발송됩니다.',
         button: REPLAY ? { label: '다시보기 보러 가기', href: REPLAY } : null,
-        tail: '부트니스에서는 여러분께 도움이 되는 강의를 준비하기 위해 늘 노력하고 있습니다.'
-        // note(동의 처리 결과 상자)는 9/28 오너 「박스와 박스 안 텍스트 모두 지워줘」로 뺐다 — 제50조 제7항 처리결과 고지 자리였다
+        tail: '부트니스에서는 여러분께 도움이 되는 강의를 준비하기 위해 늘 노력하고 있습니다.' +
+              '<br><br><span style="font-size:12.5px;color:var(--sub);line-height:1.6;word-break:keep-all">' +
+              '[광고성 정보 수신동의 처리 결과]<br>귀하는 ' + agreedOn(res) + ' 부트니스의 광고성 정보 수신에 동의하셨으며, 수신동의 처리가 완료되었습니다.</span>'
+        /* ↑ 수신동의 처리 결과 알림 — 정보통신망법 제50조 제7항 · 시행령 제62조의2: ① 보내는 곳 이름 ② 동의 사실과 날짜 ③ 처리 결과를
+             **14일 안에** 알려야 한다(어기면 1천만원 이하 과태료). 방법은 제한이 없어 완료 화면에 둔다. 광고 문구를 섞으면 안 된다.
+             9/28 오너: 상자는 빼고(「박스 지워줘」), 흔히 쓰는 무난한 문구로 — 작은 회색 글씨로 둔다 */
       };
       return {
         title: '후기 고맙습니다 🙏',
