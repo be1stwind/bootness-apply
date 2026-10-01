@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6b4c9a">
+<title>인공지능으로 생산성 레벨업 · 부트니스</title>
+<meta property="og:title" content="인공지능으로 생산성 레벨업 · 부트니스">
+<meta property="og:description" content="AI 별거 없다고요? 별거 없게 쓰고 계신 겁니다.">
+<meta property="og:image" content="https://apply.btns.kr/ai-levelup/img/og.png">
+<meta property="og:image:width" content="720">
+<meta property="og:image:height" content="378">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  /* 인생업 판매 페이지 — 상세페이지 그림 + 「강의신청하기」 → 기수별 구글폼(로그인 필수) (2026-09-30 바색님 확정 · 한결 의뢰 · 뚝딱이)
+     정규강의 신청서는 **구글폼**이다: 구글 이메일로 강의 시청 권한을 주므로 로그인이 꼭 필요하고, 기수마다 폼 하나 = 응답 시트 하나.
+     그림: 720px 폭 그대로 틈 없이. 16 은 원본 가운데 버튼만 y 440~600 으로 잘라 씀. og.png = 01 의 가운데 720×378(카톡 링크 미리보기) */
+  :root{--paper:#faf7ef;--ink:#383839;--sub:#6e6a60;--accent:#6b4c9a}
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);font-family:Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    word-break:keep-all;-webkit-text-size-adjust:100%}
+  .landing{max-width:720px;margin:0 auto;background:#fff}
+  .landing img{display:block;width:100%;height:auto}
+  .landing a{display:block}
+  .apply{max-width:720px;margin:0 auto;background:#fff;padding:0 16px 28px;text-align:center}
+  .note{margin:0 auto;max-width:480px;padding:14px 16px;border-radius:12px;background:#f3eff8;color:var(--ink);font-size:15.5px;line-height:1.6}
+  .note[hidden]{display:none}
+  /* 할부 금액 한 줄 — 「강의신청하기」 바로 위. 문구가 없으면 숨는다(10/1 한결: 그로블 결제창은 할부를 못 보여 준다) */
+  .price{margin:0;padding:18px 16px 6px;background:#fff;text-align:center;font-size:17px;line-height:1.55;color:var(--ink);font-weight:700;text-wrap:balance}
+  .price .n{white-space:nowrap}
+  .price[hidden]{display:none}
+  .price small{display:block;font-size:13px;font-weight:400;color:var(--sub)}
+  .note b{color:var(--accent)}
+  .note .copy{margin-top:10px;display:inline-block;border:1px solid var(--accent);background:#fff;color:var(--accent);font:inherit;font-weight:700;
+    border-radius:10px;padding:8px 14px;cursor:pointer}
+  .foot{max-width:720px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom));text-align:center;font-size:13px;color:var(--sub)}
+  .foot a{color:var(--sub)}
+  /* 떠 있는 「강의 신청하기」 — 아래 「강의신청하기」 그림이 화면에 들어오면 숨는다 */
+  .float-go{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:9;
+    width:min(480px,calc(100% - 32px));display:block;text-align:center;text-decoration:none;font-weight:800;font-size:17px;
+    color:#fff;background:var(--accent);border-radius:14px;padding:15px 0;box-shadow:0 6px 18px rgba(0,0,0,.18);transition:opacity .2s}
+  .float-go.off{background:#8f8a99;font-size:15.5px}
+  .float-go.hide{opacity:0;pointer-events:none}
+  .float-go:focus-visible,.landing a:focus-visible{outline:3px solid #f4d017;outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.float-go{transition:none}}
+</style>
+</head>
+<body>
+<section class="landing" aria-label="강의 소개">
+<!-- 그림:시작 — 그림넣기.py 가 이 사이를 다시 쓴다 -->
+  <img src="img/01.png" width="720" height="1039" alt="인공지능으로 생산성 레벨업">
+  <img src="img/02.png" width="720" height="2479" alt="" loading="lazy">
+  <img src="img/03.png" width="720" height="3041" alt="" loading="lazy">
+  <img src="img/04.png" width="720" height="2164" alt="" loading="lazy">
+  <img src="img/05.png" width="720" height="2195" alt="" loading="lazy">
+  <img src="img/06.png" width="720" height="1747" alt="" loading="lazy">
+  <img src="img/07.png" width="720" height="1228" alt="" loading="lazy">
+  <img src="img/08.png" width="720" height="1791" alt="" loading="lazy">
+  <img src="img/09.png" width="720" height="2108" alt="" loading="lazy">
+  <img src="img/10.png" width="720" height="1231" alt="" loading="lazy">
+  <img src="img/11.png" width="720" height="727" alt="" loading="lazy">
+  <img src="img/12.png" width="720" height="1756" alt="" loading="lazy">
+  <img src="img/13.png" width="720" height="670" alt="" loading="lazy">
+  <img src="img/14.png" width="720" height="2170" alt="" loading="lazy">
+  <img src="img/15.png" width="720" height="1380" alt="" loading="lazy">
+  <img src="img/16.png" width="720" height="975" alt="" loading="lazy">
+  <p class="price" id="priceLine" hidden></p>
+  <a id="applyImg" class="go" href="#"><img src="img/apply.png" width="720" height="118" alt="강의신청하기" loading="lazy"></a>
+<!-- 그림:끝 -->
+</section>
+<section class="apply" id="apply">
+  <p class="note" id="note" role="status" hidden></p>
+</section>
+<p class="foot">부트니스 · BOOTNESS · <a href="https://apply.btns.kr/privacy/" target="_blank" rel="noopener">개인정보처리방침</a></p>
+<a class="float-go go" id="floatGo" href="#">강의 신청하기</a>
+
+<script>
+/* ⬜ 기수마다 고칠 곳 — 구글폼 주소와 세 시각. 다음 기수엔 이 덩어리와 img/ 만 바꾼다 */
+var 기수 = {
+  formUrl:  'https://docs.google.com/forms/d/1Q8My6XFU1HDpr9hoCSBGxCdKV6hNl65zJPAI6k13XE4/viewform',  // 2기 구글폼(로그인 필수·응답 1회). 게시 뒤 /d/e/… 로 넘어간다
+  opensAt:  '2026-10-01T22:00:00+09:00',       // 판매 시작 = 얼리버드 시작 — 10/1 밤 10시(바색님 10/1 18:58 「판매기간은 10월 1일 오후 10시부터」)
+  closesAt: '2026-10-05T00:00:00+09:00',       // 10/4(일) 23:59 마감 — 그로블 판매 마감과 같게
+  openText: '10월 1일(목) 밤 10시에 신청이 열려요',
+  /* 할부 한 줄 — 문구는 한결 10/1 19:2x 안(바색님 답 전). ⬜ 할부줄켜기 는 한결의 「할부줄 켜기」(바색님 말 인용)를 받은 뒤에만 true.
+     earlyEnd 전에는 얼리줄, 뒤에는 정가줄. {월} = 가격 ÷ 할부개월(반올림). 주소 끝에 ?price=1 을 붙이면 꺼져 있어도 보인다(확인용) */
+  할부줄켜기: true,     // 바색님 10/1 19:4x 「ㅇㅇ」(한결 전달) — 공개 때 함께 나간다
+  얼리줄: '얼리버드 55만원 · 12개월로 나누면 한 달 {월}',
+  정가줄: '수강비 77만원 · 12개월로 나누면 한 달 {월}',
+  작은줄: '할부 이자와 무이자 개월 수는 카드사마다 다릅니다',
+  earlyEnd: '2026-10-04T00:00:00+09:00', earlyPrice: 550000, price: 770000, 할부개월: 12
+};
+
+(function () {
+  var q = location.search, preview = /[?&]preview=/.test(q);
+  var now = Date.now(), before = !preview && now < new Date(기수.opensAt).getTime(), after = !preview && now >= new Date(기수.closesAt).getTime();
+  var note = document.getElementById('note'), fl = document.getElementById('floatGo');
+  var ua = navigator.userAgent || '';
+  var kakao = /KAKAOTALK/i.test(ua);
+  var android = /Android/i.test(ua), ios = /iPhone|iPad|iPod/i.test(ua);
+  /* 구글은 앱 안에 박힌 브라우저에서 로그인을 막는다 → 폼이 로그인 필수라 **바깥 브라우저에서** 열어야 한다 */
+  var otherInApp = /Instagram|FBAN|FBAV|FB_IAB|NAVER\(inapp|Line\/|Band\/|DaumApps|everytimeApp|; wv\)/i.test(ua) && !kakao;
+
+  function show(html) { note.innerHTML = html; note.hidden = false; }
+  function openForm() {
+    var u = 기수.formUrl;
+    if (preview) { show('미리보기라 넘어가지 않아요. ' + (otherInApp && !android ? '실제로는 「Safari로 열기」 안내가 뜹니다.'
+           : '실제로는 <b>' + (kakao ? '바깥 브라우저' : otherInApp ? '크롬' : '같은 창') + '</b>에서 구글폼을 엽니다.') + '<br><small>' + u + '</small>'); return; }
+    if (kakao) { location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(u); return; }   // 카카오 공식 스킴 — 안드로이드·아이폰 공통
+    if (otherInApp && android) {                                                                          // 인스타·네이버 앱 등(안드로이드) → 크롬으로
+      location.href = 'intent://' + u.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(u) + ';end';
+      return;
+    }
+    if (otherInApp) {                                                                                     // 아이폰의 다른 앱 — 앱이 바깥으로 넘겨 주지 않는다. 안내만
+      show('이 앱 안에서는 구글 로그인이 막혀 신청서를 쓸 수 없어요.<br>오른쪽 위 <b>⋯ 메뉴 → 「Safari로 열기」</b>를 눌러 주세요.' +
+           '<br><button type="button" class="copy" id="copyBtn">신청서 주소 복사하기</button>');
+      var c = document.getElementById('copyBtn');
+      if (c) c.onclick = function () {
+        (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(
+          function () { c.textContent = '복사했어요 — Safari 주소창에 붙여 넣어 주세요'; },
+          function () { c.textContent = u; });
+      };
+      return;
+    }
+    location.href = u;                                                                                    // 보통 브라우저 — 같은 창
+  }
+
+  var 막힘 = before ? 기수.openText : after ? '신청이 마감되었습니다' : '';
+  if (막힘) { fl.textContent = 막힘; fl.classList.add('off'); }
+  [].forEach.call(document.querySelectorAll('.go'), function (a) {
+    a.setAttribute('href', 막힘 ? '#apply' : 기수.formUrl);                       // 스크립트가 없어도 폼으로는 간다
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (막힘) { show(before ? '<b>' + 기수.openText + '.</b><br>얼리버드는 10월 1일(목) 밤 10시부터 10월 3일(토) 밤 11시 59분까지예요.'
+                             : '<b>인생업 2기 신청이 마감되었습니다.</b><br>다음 기수 소식은 부트니스 카카오채널과 네이버카페에서 가장 먼저 알려 드립니다.');
+                 note.scrollIntoView({ block: 'center' }); return; }
+      openForm();
+    });
+  });
+
+  /* 할부 한 줄 채우기 */
+  var pl = document.getElementById('priceLine');
+  if (pl && (기수.할부줄켜기 || /[?&]price=1/.test(q))) {
+    var 얼리 = now < new Date(기수.earlyEnd).getTime() && !/[?&]price=1&regular/.test(q);
+    var 값 = 얼리 ? 기수.earlyPrice : 기수.price;
+    var 원 = function (n) { return '<span class="n">' + Math.round(n).toLocaleString('ko-KR') + '원</span>'; };   // 금액 앞에서 줄이 끊기지 않게
+    pl.innerHTML = (얼리 ? 기수.얼리줄 : 기수.정가줄).replace(/(\d+만원)/, '<span class="n">$1</span>').replace('{월}', 원(값 / 기수.할부개월)) + (기수.작은줄 ? '<small>' + 기수.작은줄 + '</small>' : '');
+    pl.hidden = false;
+  }
+
+  /* 떠 있는 버튼 — 아래 「강의신청하기」 그림이 조금이라도 보이면 숨긴다 */
+  var target = document.getElementById('applyImg');
+  if ('IntersectionObserver' in window && target)
+    new IntersectionObserver(function (es) { fl.classList.toggle('hide', es[0].isIntersecting); }, { threshold: 0 }).observe(target);
+})();
+</script>
+</body>
+</html>
