@@ -37,12 +37,12 @@
     border-radius:10px;padding:8px 14px;cursor:pointer}
   .foot{max-width:720px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom));text-align:center;font-size:13px;color:var(--sub)}
   .foot a{color:var(--sub)}
-  /* 떠 있는 「강의 신청하기」 — 10/2 바색님: 맨 아래 그림 버튼은 빼고 이 버튼만. 흰 테두리·노랑은 반려(「버튼 색은 유지하면서 자연스럽게」) → 보라 버튼 + 아래 반투명 흰 띠(한결) */
+  /* 떠 있는 「강의 신청하기」 — 10/2 바색님: 맨 아래 그림 버튼은 빼고 이 버튼만. 흰 테두리·노랑은 반려(「버튼 색은 유지하면서 자연스럽게」) → 보라 버튼 + 아래 반투명 띠. 띠는 바탕 미색(--paper #faf7ef)·투명 72%·흐림(바색님 「띠를 바탕(미색?)색과 동일하게 맞춰주고 투명효과」) */
   .float-go{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));z-index:9;
     width:min(480px,calc(100% - 32px));display:block;text-align:center;text-decoration:none;font-weight:800;font-size:17px;
     color:#fff;background:var(--accent);border:0;border-radius:14px;padding:15px 0;box-shadow:0 4px 14px rgba(107,76,154,.35);transition:opacity .2s}
   .float-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:8;width:min(720px,100%);height:calc(82px + env(safe-area-inset-bottom));
-    background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 -6px 18px rgba(0,0,0,.10);pointer-events:none}
+    background:rgba(250,247,239,.72);-webkit-backdrop-filter:saturate(140%) blur(12px);backdrop-filter:saturate(140%) blur(12px);box-shadow:0 -4px 14px rgba(0,0,0,.06);pointer-events:none}
   .float-go.off{background:#8f8a99;font-size:15.5px}
   .float-go.hide{opacity:0;pointer-events:none}
   .float-go:focus-visible,.landing a:focus-visible{outline:3px solid #f4d017;outline-offset:2px}
@@ -52,19 +52,19 @@
 <body>
 <section class="landing" aria-label="강의 소개">
 <!-- 그림:시작 — 그림넣기.py 가 이 사이를 다시 쓴다 -->
-  <img src="img/01.png?v=10021901" width="720" height="633" alt="인공지능으로 생산성 레벨업">
-  <img src="img/02.png?v=10021901" width="720" height="2450" alt="" loading="lazy">
-  <img src="img/03.png?v=10021901" width="720" height="2650" alt="" loading="lazy">
-  <img src="img/04.png?v=10021901" width="720" height="3226" alt="" loading="lazy">
-  <img src="img/05.png?v=10021901" width="720" height="3428" alt="" loading="lazy">
-  <img src="img/06.png?v=10021901" width="720" height="1492" alt="" loading="lazy">
-  <img src="img/07.png?v=10021901" width="720" height="1228" alt="" loading="lazy">
-  <img src="img/08.png?v=10021901" width="720" height="3672" alt="" loading="lazy">
-  <img src="img/09.png?v=10021901" width="720" height="727" alt="" loading="lazy">
-  <img src="img/10.png?v=10021901" width="720" height="907" alt="" loading="lazy">
-  <img src="img/11.png?v=10021901" width="720" height="1700" alt="" loading="lazy">
-  <img src="img/12.png?v=10021901" width="720" height="1285" alt="" loading="lazy">
-  <img src="img/13.png?v=10021901" width="720" height="1120" alt="" loading="lazy">
+  <img src="img/01.png?v=10021909" width="720" height="633" alt="인공지능으로 생산성 레벨업">
+  <img src="img/02.png?v=10021909" width="720" height="2450" alt="" loading="lazy">
+  <img src="img/03.png?v=10021909" width="720" height="2650" alt="" loading="lazy">
+  <img src="img/04.png?v=10021909" width="720" height="3226" alt="" loading="lazy">
+  <img src="img/05.png?v=10021909" width="720" height="3428" alt="" loading="lazy">
+  <img src="img/06.png?v=10021909" width="720" height="1492" alt="" loading="lazy">
+  <img src="img/07.png?v=10021909" width="720" height="1228" alt="" loading="lazy">
+  <img src="img/08.png?v=10021909" width="720" height="3672" alt="" loading="lazy">
+  <img src="img/09.png?v=10021909" width="720" height="727" alt="" loading="lazy">
+  <img src="img/10.png?v=10021909" width="720" height="907" alt="" loading="lazy">
+  <img src="img/11.png?v=10021909" width="720" height="1700" alt="" loading="lazy">
+  <img src="img/12.png?v=10021909" width="720" height="1285" alt="" loading="lazy">
+  <img src="img/13.png?v=10021909" width="720" height="1120" alt="" loading="lazy">
   <p class="price" id="priceLine" hidden></p>
 <!-- 그림:끝 -->
 </section>
