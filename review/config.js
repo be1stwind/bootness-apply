@@ -163,7 +163,8 @@
 
       { key: 'shot', type: 'file', label: '단톡방 후기 캡처를 올려 주세요', required: true,
         pickLabel: '캡처 고르기',
-        hint: '말풍선만 잘린 캡처는 확인이 어려워 다시 여쭙게 됩니다.' +   // 「방 이름이 보이게 …」 줄은 9/28 오너 지시로 뺐다
+        hint: '<b>감사 인사나 짧은 감상, AI로 작성한 티가 많이 나는 성의 없는 후기에는 리워드를 발송하지 않습니다. 특강을 듣고 무엇을 새로 알게 됐는지, 그래서 내 생각이 어떻게 달라졌는지 정성스런 후기 부탁드립니다.</b><br>' +   // 10/11 결재8-02 대표 문구 원문(채팅)
+              '말풍선만 잘린 캡처는 확인이 어려워 다시 여쭙게 됩니다.' +   // 「방 이름이 보이게 …」 줄은 9/28 오너 지시로 뺐다
               (CAPTURE_HELP ? '<details style="margin-top:6px"><summary style="cursor:pointer;font-weight:600;color:var(--ink)">' +
                 CAPTURE_HELP.title + '</summary><div style="margin-top:6px">' + CAPTURE_HELP.body + '</div></details>' : ''),
         err: '후기 캡처를 올려 주세요' },
