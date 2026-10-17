@@ -244,6 +244,20 @@ window.FORM = {
     title: '부트니스 특강 모집마감 안내',
     html: '죄송합니다. 이번 특강 접수는 마감되었습니다. 더 좋은 특강으로 찾아뵙겠습니다. 🙏<br><br>특강 공지는 <a href="https://cafe.naver.com/goldentree2nd" target="_blank" rel="noopener">부트니스 네이버카페</a>에서 가장 빨리 접하실 수 있습니다. 😊'
   },
+  /* 오프라인 정원(28명)이 찼을 때 — 서버가 error: 'full' · part: '오프라인' 으로 답한다(10/17 대표 「오프라인이 28명이 되면 신청서 닫아야해」).
+     온라인은 계속 받으니 「돌아가기」로 온오프라인만 다시 고르게 한다. 숫자는 서버가 준 res.capacity 를 쓴다 */
+  full: function (a, res) {
+    var n = (res && res.capacity) || '';
+    if (res && res.part === '오프라인') return {
+      title: '오프라인 자리가 모두 찼어요',
+      html: '강의실 ' + (n ? n + '석이' : '자리가') + ' 모두 채워졌어요.<br>온라인 라이브로는 지금도 신청하실 수 있어요.',
+      button: { label: '온라인으로 다시 고르기', back: true, clear: ['mode'] }
+    };
+    return {
+      title: '부트니스 특강 모집마감 안내',
+      html: '죄송합니다. 이번 특강 접수는 마감되었습니다. 더 좋은 특강으로 찾아뵙겠습니다. 🙏'
+    };
+  },
   /* 멤버십·온라인 멈춤 화면 (문구: 한결 · 오너, 문구검사 통과) */
   stop: {
     title: '멤버십 회원은 온라인 신청이 필요 없어요',
