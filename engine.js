@@ -289,8 +289,28 @@
   }
 
   /* ── 확인 ───────────────────────────────────────────────────────────── */
+  /* 빈칸 알림 팝업 (10/18 대표 「필수체크를 하지 않아서 신청서 제출이 안되면 안내 팝업과 함께 해당 항목으로 이동시켜줘」).
+     휴대폰에서는 빨간 작은 글씨를 놓쳐 「버튼이 안 눌린다」고 느낀다 → 무엇이 빠졌는지 한가운데 띄우고, 닫으면 그 칸으로 옮겨 준다 */
+  function pop(msg, then) {
+    var o = document.getElementById('popWrap');
+    if (!o) {
+      o = document.createElement('div'); o.id = 'popWrap';
+      o.setAttribute('style', 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px');
+      o.innerHTML = '<div role="alertdialog" aria-modal="true" style="background:#fff;color:#222;border-radius:14px;max-width:340px;width:100%;padding:22px 20px 16px;box-shadow:0 8px 30px rgba(0,0,0,.25);text-align:center">' +
+        '<p style="font-weight:700;font-size:17px;margin:0 0 8px">빠진 항목이 있어요</p>' +
+        '<p id="popMsg" style="font-size:15px;line-height:1.5;margin:0 0 16px;white-space:pre-line"></p>' +
+        '<button type="button" id="popOk" style="width:100%;border:0;border-radius:10px;padding:12px;font-size:16px;font-weight:700;background:#222;color:#fff">확인</button></div>';
+      document.body.appendChild(o);
+    }
+    document.getElementById('popMsg').textContent = msg;
+    o.style.display = 'flex';
+    var ok = document.getElementById('popOk');
+    ok.onclick = function () { o.style.display = 'none'; if (then) then(); };
+    ok.focus();
+  }
+
   function validatePage() {
-    var first = null;
+    var first = null, firstFd = null;
     FIELDS.forEach(function (fd) {
       if (fd._page !== cur || fd.type === 'info') return;
       var q = app.querySelector('.q[data-k="' + fd.key + '"]'); if (!q) return;
@@ -305,9 +325,17 @@
         else if (fd.mustEqual && v !== A[fd.mustEqual]) bad = true;
       }
       q.classList.toggle('bad', bad);
-      if (bad && !first) first = q;
+      if (bad && !first) { first = q; firstFd = fd; }
     });
-    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (first) {
+      first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var lab = String(typeof firstFd.label === 'function' ? '' : (firstFd.label || '')).replace(/<[^>]*>/g, '').replace(/\*$/, '').trim();
+      if (lab.length > 40) lab = '';                     // 긴 안내문(입금 안내 등)은 이름 대신 오류 문구만
+      pop((lab ? '「' + lab + '」\n' : '') + (firstFd.err || defaultErr(firstFd)), function () {
+        first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var inp = first.querySelector('input:not([type=hidden]),textarea,select,label'); if (inp && inp.focus) inp.focus({ preventScroll: true });
+      });
+    }
     return !first;
   }
 
