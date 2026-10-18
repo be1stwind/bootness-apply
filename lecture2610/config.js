@@ -234,7 +234,7 @@ window.FORM = {
     var payBox = bankPay(a) ? '<span class="paybox">입금하실 금액 <b>' + won(bankTotal(a)) + '</b> <span class="sub">(' + amountTag(a) + ')</span><br>' +
       '입금 계좌를 적어두는 것을 깜박하신 분은 아래 부트니스 카카오채널로 문의해 주세요.</span>' : '';
     return {
-      title: '신청서를 받았어요',
+      title: '신청서 제출이 완료되었어요',   // 10/18 대표 1번 안 — 메일 제목과 같은 말
       html: payBox + '부트니스에서는 수강생의 귀한 비용과 시간이 아깝지 않은 강의 준비를 위해 최선을 다하고 있습니다.<br><br>부트니스의 다양한 강의 소식들을 가장 빨리 접하고 싶으시다면<br>카카오채널을 추가해주세요! 😄',
       button: { label: '부트니스 카카오채널 추가', href: 회차.kakaoChannel },
       note: mailNote(a, res)
