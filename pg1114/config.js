@@ -18,7 +18,7 @@ var 회차 = {
   online: false,
   정원: 56,
   대상: '누구나',
-  deadline: '2026-11-14T15:00:00+09:00',
+  deadline: '2026-11-13T12:00:00+09:00',  // 11/13 대표 「닫아둬」 — 잠정 연기, 원래 '2026-11-14T15:00:00+09:00'
   deadlineText: '<b>11월 14일(토) 오후 3시까지</b> 신청 가능합니다.',
   뒤풀이안내: '뒤풀이 비용은 참석하신 분들끼리 나눠 냅니다.',
   placeUrl: 'https://naver.me/GGGxFt0T',             // 8월 호완정 했던 곳(대표 11/13)
@@ -117,8 +117,8 @@ window.FORM = {
     };
   },
   closed: {
-    title: '부트니스 특강 모집마감 안내',
-    html: '죄송합니다. 이번 특강 접수는 마감되었습니다. 더 좋은 특강으로 찾아뵙겠습니다. 🙏<br><br>특강 공지는 <a href="https://btns.kr" target="_blank" rel="noopener">부트니스 네이버카페</a>에서 가장 빨리 접하실 수 있습니다. 😊'
+    title: '특강 일정 연기 안내',
+    html: '아이고빡시다 님의 깜짝 특강은 일정이 미뤄졌습니다. 새 날짜가 정해지면 다시 안내드리겠습니다. 🙏<br><br>특강 공지는 <a href="https://btns.kr" target="_blank" rel="noopener">부트니스 네이버카페</a>에서 가장 빨리 접하실 수 있습니다. 😊'
   },
   full: function (a, res) {
     var n = (res && res.capacity) || '';
