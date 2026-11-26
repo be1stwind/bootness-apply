@@ -157,10 +157,8 @@
     .box .row + .row { margin-top: 4px; }
     .box .row { display: flex; gap: 12px; }
     .box .row .k { flex: none; width: 3em; text-align: justify; text-align-last: justify; color: var(--sub); }
-    .box .row .hot, .box .benefit .hot { color: var(--red); }
+    .box .row .hot { color: var(--red); }
     .box .row.note { display: block; margin-top: 8px; font-size: 14px; color: var(--sub); text-align: left; }
-    .box .nw { white-space: nowrap; }
-    .box .benefit { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #efe3a0; font-size: 16px; font-weight: 700; }
     .hidden { display: none !important; }
     .foot { max-width: 440px; margin: 0 auto 32px; padding: 16px 16px 0; border-top: 1px solid var(--line); text-align: center; font-size: 12px; line-height: 1.7; color: var(--sub); }
     .foot p { margin: 0 0 6px; } .foot span { white-space: nowrap; } .foot a { color: var(--sub); }
@@ -262,11 +260,11 @@
         badge.textContent = '연장 대상이에요';
         dday.textContent = '만기까지 ' + r.daysLeft + '일 남았어요';
         if (r.daysLeft <= 14) dday.className = 'dday hot';
-        lead.textContent = '이번 만기에 연장하시면 지금처럼 멤버십 혜택을 이어서 받으실 수 있어요.';
+        // 11/26 대표 「이번 만기에 연장하시면을 12월 20일까지 연장하시면 그 멘트로 쓰라는거고 이번엔 강조가 너무 많아」
+        lead.textContent = (r.renew.benefitUntil && r.renew.discount)
+          ? r.renew.benefitUntil + ' 연장하시면 ' + r.renew.discount + '된 가격으로 연장하실 수 있어요.'
+          : '이번 만기에 연장하시면 지금처럼 멤버십 혜택을 이어서 받으실 수 있어요.';
         var rows = [];
-        if (r.renew.benefitUntil && r.renew.discount)
-          rows.push('<div class="benefit">🎁 <span class="hot">' + esc(r.renew.benefitUntil) + '</span> 연장하시면 <span class="hot nw">' +
-            esc(r.renew.discount) + '</span>된 가격으로 연장하실 수 있어요.</div>');
         if (r.renew.price) rows.push('<div class="row"><span class="k">연장가</span><b>' + esc(r.renew.price) + '</b></div>');
         if (r.renew.deadline) rows.push('<div class="row"><span class="k">마감</span><b class="hot">' + esc(r.renew.deadline) + '</b></div>');
         if (r.renew.after) rows.push('<div class="row note">' + esc(r.renew.after) + '</div>');
