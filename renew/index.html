@@ -156,7 +156,9 @@
     .box b { font-weight: 800; }
     .box .row + .row { margin-top: 4px; }
     .box .row { display: flex; gap: 12px; }
-    .box .row .k { flex: none; width: 3em; text-align: justify; text-align-last: justify; color: var(--sub); }
+    .box .row .k { flex: none; width: 3em; white-space: nowrap; color: var(--sub); }
+    .box .row .k.sp { letter-spacing: 1em; }   /* 11/26 대표 「마감 자간 늘려서 연장가랑 폭 맞추고」 */
+    .lead .hot { color: var(--red); font-weight: 800; }
     .box .row .hot { color: var(--red); }
     .box .row.note { display: block; margin-top: 8px; font-size: 14px; color: var(--sub); text-align: left; }
     .hidden { display: none !important; }
@@ -261,12 +263,12 @@
         dday.textContent = '만기까지 ' + r.daysLeft + '일 남았어요';
         if (r.daysLeft <= 14) dday.className = 'dday hot';
         // 11/26 대표 「이번 만기에 연장하시면을 12월 20일까지 연장하시면 그 멘트로 쓰라는거고 이번엔 강조가 너무 많아」
-        lead.textContent = (r.renew.benefitUntil && r.renew.discount)
-          ? r.renew.benefitUntil + ' 연장하시면 ' + r.renew.discount + '된 가격으로 연장하실 수 있어요.'
-          : '이번 만기에 연장하시면 지금처럼 멤버십 혜택을 이어서 받으실 수 있어요.';
+        if (r.renew.benefitUntil && r.renew.discount)
+          lead.innerHTML = esc(r.renew.benefitUntil) + ' 연장하시면 <span class="hot">' + esc(r.renew.discount) + '</span>된 가격으로 연장하실 수 있어요.';
+        else lead.textContent = '이번 만기에 연장하시면 지금처럼 멤버십 혜택을 이어서 받으실 수 있어요.';
         var rows = [];
         if (r.renew.price) rows.push('<div class="row"><span class="k">연장가</span><b>' + esc(r.renew.price) + '</b></div>');
-        if (r.renew.deadline) rows.push('<div class="row"><span class="k">마감</span><b class="hot">' + esc(r.renew.deadline) + '</b></div>');
+        if (r.renew.deadline) rows.push('<div class="row"><span class="k sp">마감</span><b class="hot">' + esc(r.renew.deadline) + '</b></div>');
         if (r.renew.after) rows.push('<div class="row note">' + esc(r.renew.after) + '</div>');
         if (!rows.length) rows.push('<div class="row">연장 방법은 멤버십 공지방에서 안내해 드려요.</div>');
         box.innerHTML = rows.join('');
