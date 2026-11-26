@@ -41,10 +41,11 @@ function payRows(a) {
 function hurry() {
   if (late()) return '';
   return '<span style="display:block;margin-top:10px;padding-top:10px;border-top:1px solid #efe8d6;text-align:left;font-weight:400">' +
-    '<b style="font-size:inherit;font-weight:700">12월 20일(일) 밤 12시</b>까지 입금하셔야 할인 혜택을 받으실 수 있어요.<br>' +
-    '12월 21일(월)부터는 1년 ' + man(연장.late.fee) + '으로 올라요.</span>';
+    '<b style="font-size:inherit;font-weight:700">12월 20일(일) 밤 12시</b>까지 입금하셔야 할인 혜택을 받으실 수 있습니다.<br>' +
+    '12월 21일(월)부터는 ' + man(연장.late.fee) + '으로 오릅니다.</span>';
 }
 
+/* 11/26 대표 「그래도 좀 너무 요체 쓰니까 그래보이는데」 → 신청서는 습니다체(정기특강 신청서와 같은 결) */
 window.FORM = {
   formId: 연장.formId,
   endpoint: 연장.endpoint,
@@ -72,7 +73,7 @@ window.FORM = {
       { key: 'receiptNo', type: 'text', label: '현금영수증 발급을 원하는 휴대폰 번호 또는 사업자 번호를 적어 주세요.', maxlength: 20,
         showIf: function (a) { return !!a.receipt; }, requiredIf: function (a) { return !!a.receipt; },
         err: '현금영수증 받을 번호를 적어 주세요' },
-      { key: 'depositAck', type: 'ack', checkLabel: '예, 확인했어요', checkValue: '예', required: true, err: '확인하고 「예, 확인했어요」를 눌러 주세요',
+      { key: 'depositAck', type: 'ack', checkLabel: '예, 확인했습니다', checkValue: '예', required: true, err: '확인하고 「예, 확인했습니다」를 눌러 주세요',
         label: '입금까지 마쳐야 연장 신청이 끝납니다. 확인하셨나요?' },
       { key: 'depositor', type: 'text', label: '입금자명이 앞서 적은 성함과 다르면 입금자명을 적어 주세요.', maxlength: 30 }
     ] }
@@ -85,14 +86,14 @@ window.FORM = {
 
   done: function (a) {
     return {
-      title: '연장 신청서를 받았어요',
+      title: '연장 신청이 접수되었습니다',
       html: '<span class="paybox">' + payRows(a) + '</span>' +
-        '입금이 확인되면 멤버십이 1년 연장돼요.<br>궁금한 점은 카카오채널로 물어봐 주세요.',
+        '입금이 확인되면 멤버십이 1년 연장됩니다.<br>궁금한 점은 카카오채널로 문의해 주세요.',
       button: { label: '부트니스 카카오채널', href: 연장.kakaoChannel }
     };
   },
   closed: {
-    title: '멤버십 연장 신청이 마감되었어요',
-    html: '궁금한 점은 <a href="https://pf.kakao.com/_xmHxgNT" target="_blank" rel="noopener">부트니스 카카오채널</a>로 물어봐 주세요.'
+    title: '멤버십 연장 신청이 마감되었습니다',
+    html: '궁금한 점은 <a href="https://pf.kakao.com/_xmHxgNT" target="_blank" rel="noopener">부트니스 카카오채널</a>로 문의해 주세요.'
   }
 };
