@@ -26,7 +26,7 @@ function man(n) { return (n / 10000) + '만 원'; }
 function late() { return Date.now() >= new Date(연장.PRICE_SWITCH).getTime(); }
 function price() { return late() ? 연장.late : 연장.early; }
 /* 11/26 대표 「입금계좌쪽 폰트가 너무 여러번 바뀌어서 엄청 번잡스러워 보여」
-   → 같은 크기 · 왼쪽 이름(회색, 「연장가」 폭에 맞춤) · 오른쪽 값(굵게) 한 가지 꼴로만. 빨강은 「50% 할인」 한 곳. */
+   → 같은 크기 · 왼쪽 이름(회색, 「연장가」 폭에 맞춤) · 오른쪽 값(굵게) 한 가지 꼴로만.  */
 function payRow(k, v, sp, hot) {
   return '<span style="display:flex;gap:12px;text-align:left"><span style="flex:none;width:3em;white-space:nowrap;font-weight:400;color:var(--sub)' +
     (sp ? ';letter-spacing:1em' : '') + '">' + k + '</span><b style="font-size:inherit;font-weight:700' + (hot ? ';color:var(--err)' : '') + '">' + v + '</b></span>';
@@ -34,7 +34,15 @@ function payRow(k, v, sp, hot) {
 function payAmount(a) { return (a && a.receipt) ? price().total : price().fee; }   // 현금영수증 원하면 10% 더함
 function payRows(a) {
   return payRow('은행', 연장.bank, true) + payRow('계좌', 연장.accountNo, true) + payRow('예금주', 연장.holder) +
-    payRow('금액', won(payAmount(a)) + ((a && a.receipt) ? ' (현금영수증 포함)' : ''), true);
+    payRow('금액', won(payAmount(a)) + ((a && a.receipt) ? ' (현금영수증 포함)' : ''), true) + hurry();
+}
+/* 11/26 대표 「입금쪽에 12월 20일까지 입금 안하면 혜택이 끝나서 24만원으로 올라간다는 쪽의 멘트를 써서 빠른 입금을 독려해」
+   — 금액 상자 맨 아래 한 줄. 12/21 0시가 지나면 저절로 사라진다 */
+function hurry() {
+  if (late()) return '';
+  return '<span style="display:block;margin-top:10px;padding-top:10px;border-top:1px solid #efe8d6;text-align:left;font-weight:400">' +
+    '<b style="font-size:inherit;font-weight:700">12월 20일(일) 밤 12시</b>까지 입금하셔야 할인 혜택을 받으실 수 있어요.<br>' +
+    '12월 21일(월)부터는 1년 ' + man(연장.late.fee) + '으로 올라요.</span>';
 }
 
 window.FORM = {
@@ -46,15 +54,9 @@ window.FORM = {
   accent: '#383839',
   eyebrow: '부트니스 멤버십',
   title: '멤버십 연장 신청',
-  /* 11/26 대표 「마감과 연장의 단어 폭을 맞추고 연장혜택 마감일자 같은건 강조를 좀 해야되지 않을까? (색으로)
-     그리고 12월 20일 까지 연장하면 50% 할인된 가격으로 연장할 수 있다. 는 식으로 혜택 안내를 적는게 좋을 듯」 */
-  /* 11/26 대표 「마감은 12월 31일까지지 중요한 부분도 아니고. 할인이 12월 20일까지인거고. 그리고 신청서 폼에 똑같은 내용 반복하니까 좀 그런데」
-     → 머리글은 할인 한 문장만. 금액은 입금계좌 상자에서만 보여 준다. 마감 줄 없앰. */
-  heroLines: function () {
-    return late()
-      ? ['연장 금액은 1년 ' + man(연장.late.fee) + '(부가세 별도)입니다.']
-      : ['12월 20일(일)까지 연장하시면 <b style="color:var(--err)">50% 할인</b>된 <span style="white-space:nowrap">1년 ' + man(연장.early.fee) + '(부가세 별도)</span>에 연장하실 수 있어요.'];
-  },
+  /* 11/26 대표 「이미 신청서 작성에 들어온 사람은 할인을 알고 들어왔으니 (지금 루트상 신청서를 바로 들어오는 루트는 없으니)
+     위에 또 할인 안내하지 말고」 · 「이미 제출했는데 50% 할인 안내가 계속 떠 있을 이유가 뭐며」 → 머리글은 제목만 */
+  heroLines: [],
 
   pages: [
     { title: '', fields: [
@@ -62,17 +64,17 @@ window.FORM = {
       { key: 'phone', type: 'tel', label: '휴대폰 번호를 적어 주세요.', hint: '숫자만 적어 주세요 (예: 01012345678)', required: true, autocomplete: 'tel' },
       { key: 'phone2', type: 'tel', label: '휴대폰 번호를 한 번 더 적어 주세요.', required: true, mustEqual: 'phone', noSubmit: true,
         err: '위에 적은 번호와 똑같이 적어 주세요' },
-      { type: 'info', html: '적어 주신 정보는 멤버십 연장 확인과 안내에만 씁니다.' },
-
-      { key: 'receipt', type: 'ack', checkLabel: '예', divider: true,
-        label: function () { return '현금영수증이 필요하시면 「예」를 눌러 주세요. 부가세 10%를 더해 ' + won(price().total) + '을 입금해 주시면 됩니다.'; } },
-      { key: 'receiptNo', type: 'text', label: '현금영수증을 받을 휴대폰 번호 또는 사업자 번호를 적어 주세요.', maxlength: 20,
+      /* 11/26 대표 「우리 순서가 금액안내 먼저 하고 그 뒤에 현금영수증 물어보지 않나?」 → 정기특강 신청서와 같은 순서.
+         「적어준 정보 어디에 쓰는지 확인문구는 왜 갑자기 나와?」 → 뺌(회원 계약 이행이라 동의·안내 줄 없음) */
+      { type: 'info', html: function (a) { return payRows(a); } },
+      { key: 'receipt', type: 'ack', checkLabel: '예, 발급해 주세요', checkValue: '예', divider: true,
+        label: '소득공제 혹은 지출증빙을 위해 현금영수증 발급을 원하실 경우 연장 금액의 10%(부가세)를 추가 입금해 주세요.' },
+      { key: 'receiptNo', type: 'text', label: '현금영수증 발급을 원하는 휴대폰 번호 또는 사업자 번호를 적어 주세요.', maxlength: 20,
         showIf: function (a) { return !!a.receipt; }, requiredIf: function (a) { return !!a.receipt; },
         err: '현금영수증 받을 번호를 적어 주세요' },
-      { type: 'info', html: function (a) { return payRows(a); } },
-      { key: 'depositor', type: 'text', label: '입금자명이 앞서 적은 성함과 다르면 입금자명을 적어 주세요.', maxlength: 30 },
-      { key: 'depositAck', type: 'ack', checkLabel: '예', required: true, err: '확인하고 「예」를 눌러 주세요',
-        label: '입금까지 마쳐야 연장 신청이 끝납니다. 확인하셨나요?' }
+      { key: 'depositAck', type: 'ack', checkLabel: '예, 확인했어요', checkValue: '예', required: true, err: '확인하고 「예, 확인했어요」를 눌러 주세요',
+        label: '입금까지 마쳐야 연장 신청이 끝납니다. 확인하셨나요?' },
+      { key: 'depositor', type: 'text', label: '입금자명이 앞서 적은 성함과 다르면 입금자명을 적어 주세요.', maxlength: 30 }
     ] }
   ],
 
@@ -85,7 +87,7 @@ window.FORM = {
     return {
       title: '연장 신청서를 받았어요',
       html: '<span class="paybox">' + payRows(a) + '</span>' +
-        '입금이 확인되면 연장이 끝납니다.<br>궁금한 점은 카카오채널로 물어봐 주세요.',
+        '입금이 확인되면 멤버십이 1년 연장돼요.<br>궁금한 점은 카카오채널로 물어봐 주세요.',
       button: { label: '부트니스 카카오채널', href: 연장.kakaoChannel }
     };
   },
