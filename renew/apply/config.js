@@ -34,11 +34,16 @@ window.FORM = {
   accent: '#383839',
   eyebrow: '부트니스 멤버십',
   title: '멤버십 연장 신청',
+  /* 11/26 대표 「마감과 연장의 단어 폭을 맞추고 연장혜택 마감일자 같은건 강조를 좀 해야되지 않을까? (색으로)
+     그리고 12월 20일 까지 연장하면 50% 할인된 가격으로 연장할 수 있다. 는 식으로 혜택 안내를 적는게 좋을 듯」 */
   heroLines: function () {
+    var K = function (t) { return '<span style="display:inline-block;width:3em;text-align:justify;text-align-last:justify">' + t + '</span> '; };
+    var HOT = function (t) { return '<b style="color:var(--err)">' + t + '</b>'; };
     return late()
-      ? ['💛 연장 금액 : <b>1년 ' + man(연장.late.fee) + '</b> (부가세 별도)']
-      : ['💛 연장 금액 : <b>1년 ' + man(연장.early.fee) + '</b> (부가세 별도)',
-         '⏰ <b>12월 20일(일) 밤 12시까지 입금</b>하신 분까지 이 금액이에요.',
+      ? [K('연장가') + '<b>1년 ' + man(연장.late.fee) + '</b> (부가세 별도)']
+      : ['🎁 ' + HOT('12월 20일(일)까지') + ' 연장하시면 <span style="white-space:nowrap">' + HOT('50% 할인') + '된 가격으로</span> 연장하실 수 있어요.',
+         K('연장가') + '<b>1년 ' + man(연장.early.fee) + '</b> (부가세 별도)',
+         K('마감') + HOT('12월 20일(일) 밤 12시까지 입금'),
          '12월 21일(월)부터는 1년 ' + man(연장.late.fee) + '(부가세 별도)입니다.'];
   },
 
@@ -74,7 +79,7 @@ window.FORM = {
     return {
       title: '연장 신청서를 받았어요',
       html: '<span class="paybox">입금계좌<br><b style="font-size:16px">' + 연장.account + '</b><br>입금하실 금액 <b>' + won(price().total) + '</b> <span class="sub">(' + amountTag() + ')</span>' +
-        (late() ? '' : '<br>12월 20일(일) 밤 12시까지 입금해 주세요.') + '</span>' +
+        (late() ? '' : '<br><b style="color:var(--err)">12월 20일(일) 밤 12시까지</b> 입금해 주세요.') + '</span>' +
         '입금이 확인되면 연장이 끝납니다.<br>궁금한 점은 아래 부트니스 카카오채널로 물어봐 주세요.',
       button: { label: '부트니스 카카오채널', href: 연장.kakaoChannel }
     };
