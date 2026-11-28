@@ -14,8 +14,8 @@ var 감사의밤 = {
   formId:   'thanks2612',                         // 백엔드 FORMS 키 → 「정기특강_신청명단」 시트의 탭 「2612_감사의밤」(12월은 정기특강 대신 송년회)
   endpoint: 'https://script.google.com/macros/s/AKfycbxjd7-hFlao-hi2A-kB4Rg1OC1NbCBneBieqWA9lCkKUWk3c1Gv7D3hNlpKf6VloYnF/exec',   // 모든 신청폼 공통 백엔드
   /* ── 여기 세 줄이 설정값이다 ───────────────────────────────── */
-  외부신청: false,                                 // false = 멤버십 회원만 · true = 회원이 아닌 분도 · '2026-12-01T00:00:00+09:00' 처럼 시각을 적으면 그때부터 저절로 열림
-  capacity: 90,                                    // 화면에 보이는 정원. 실제로 막는 건 서버 FORMS.thanks2612.capacity — 둘을 같게
+  외부신청: '2026-12-01T00:00:00+09:00',          // 12/1 0시부터 회원이 아닌 분도 저절로 열림(결재 한결09-02 A) · false = 멤버십 회원만 · true = 회원이 아닌 분도 · '2026-12-01T00:00:00+09:00' 처럼 시각을 적으면 그때부터 저절로 열림
+  capacity: 90,                                    // 화면에는 숫자를 쓰지 않는다(결재 한결09-04 A). 실제로 막는 건 서버 FORMS.thanks2612.capacity — 둘을 같게
   deadline: '2026-12-09T23:59:59+09:00',           // 12/9(수) 밤 11시 59분까지. 서버 deadline 과 같게. 화면의 마감 글자는 이 값에서 만든다
   /* ───────────────────────────────────────────────────────── */
   when:     '2026년 12월 19일(토) <span style="white-space:nowrap">저녁 6시 ~ 밤 10시쯤</span>',   // 폰에서 「밤 / 10시쯤」으로 끊기지 않게 시간은 한 덩어리로
@@ -72,7 +72,6 @@ window.FORM = {
     '🍽️ ' + 감사의밤.dinner,
     '📍 장소 : 참석이 확정된 분께 따로 안내해 드립니다.',
     '💳 회비 : <b>' + won(감사의밤.fee) + '</b> (현금영수증을 원하시면 ' + won(감사의밤.feeReceipt) + ') · 계좌이체',
-    '👥 정원 : <b>' + 감사의밤.capacity + '명</b>',
     외부열림() ? null : '💛 지금은 <b>멤버십 회원</b> 신청을 먼저 받고 있습니다.',
     '⚠️ <b>' + deadlineText() + '까지</b> 신청하실 수 있습니다.'
   ].filter(function (x) { return x; }),
@@ -136,12 +135,11 @@ window.FORM = {
     title: '감사의 밤 신청이 마감되었습니다',
     html: '궁금한 점은 <a href="https://pf.kakao.com/_xmHxgNT" target="_blank" rel="noopener">부트니스 카카오채널</a>로 문의해 주세요.'
   },
-  /* 정원이 찼을 때 — 서버가 error: 'full' · capacity 로 답한다. 숫자는 서버 값을 쓴다 */
+  /* 정원이 찼을 때 — 서버가 error: 'full' 로 답한다. 정원 숫자는 화면에 쓰지 않는다(결재 한결09-04 A) */
   full: function (a, res) {
-    var n = (res && res.capacity) || 감사의밤.capacity;
     return {
       title: '감사의 밤 신청 자리가 모두 찼습니다',
-      html: '정원 ' + n + '명이 모두 채워졌습니다.<br>궁금한 점은 카카오채널로 문의해 주세요.',
+      html: '준비한 자리가 모두 채워졌습니다.<br>궁금한 점은 카카오채널로 문의해 주세요.',
       button: { label: '부트니스 카카오채널', href: 감사의밤.kakaoChannel }
     };
   }
